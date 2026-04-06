@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Артемида II — Живой трекер миссии NASA</title>
+<meta name="description" content="Первый полёт людей к Луне за 53 года. Следите за кораблём Орион в реальном времени.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   CSS RESET & CUSTOM PROPERTIES
+══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --cyan:    #00c8ff;
+  --cyan2:   #0090cc;
+  --orange:  #ff6b35;
+  --green:   #39ff6a;
+  --purple:  #c060ff;
+  --amber:   #ffb830;
+  --red:     #ff3030;
+  --txt:     #bdd8f0;
+  --sub:     rgba(189,216,240,0.45);
+  --glass:   rgba(4,12,30,0.82);
+  --border:  rgba(0,180,255,0.14);
+  --border2: rgba(0,180,255,0.28);
+  --scan: rgba(0,200,255,0.03);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: #020408;
+  color: var(--txt);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+img { max-width: 100%; }
+a { color: inherit; }
+
+/* ══ TYPOGRAPHY ══ */
+.orb  { font-family: 'Orbitron', monospace; }
+.mono { font-family: 'Share Tech Mono', monospace; }
+.bar  { font-family: 'Barlow Condensed', sans-serif; }
+
+/* ══ ANIMATIONS ══ */
+@keyframes blink   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(1.5)} }
+@keyframes shine   { 0%{background-position:0%} 100%{background-position:200%} }
+@keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulsate { 0%,100%{box-shadow:0 0 10px rgba(0,200,255,.25)} 50%{box-shadow:0 0 28px rgba(0,200,255,.6)} }
+@keyframes pulse2  { 0%,100%{opacity:1} 50%{opacity:.65} }
+@keyframes scanH   { from{transform:translateY(-100%)} to{transform:translateY(100vh)} }
+@keyframes sigbar  { 0%{opacity:.15} 100%{opacity:1} }
+@keyframes drift   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes twinkle { 0%,100%{opacity:var(--o,.7)} 50%{opacity:.04} }
+@keyframes bannerPulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes moonGlow{0%,100%{box-shadow:0 0 20px rgba(192,96,255,.4)}50%{box-shadow:0 0 40px rgba(192,96,255,.8)}}
+
+/* ══ SHINE TEXT ══ */
+.shine {
+  background: linear-gradient(90deg, var(--cyan), #fff 50%, var(--cyan));
+  background-size: 200%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 5s linear infinite;
+}
+
+/* ══ STAR FIELD ══ */
+#sf {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 30% 40%, #040e1e 0%, #010204 75%);
+}
+.star {
+  position: absolute; background: #fff; border-radius: 50%;
+  animation: twinkle var(--d,3s) ease-in-out infinite;
+}
+
+/* ══ SCAN LINE (CSS only — zero JS cost) ══ */
+#sf::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    var(--scan) 2px, var(--scan) 4px
+  );
+}
+
+/* ══ LIVE DOT ══ */
+.ldot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════ */
+.page { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
+.wrap { max-width: 1320px; margin: 0 auto; width: 100%; padding: 0 16px; }
+
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(1,4,12,.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(24px);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 10px 16px; max-width: 1320px; margin: 0 auto;
+}
+.header-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.header-icon { font-size: 22px; flex-shrink: 0; animation: drift 4s ease-in-out infinite; }
+.header-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+.header-title { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 900; letter-spacing: 3px; }
+.header-sub { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: var(--cyan); letter-spacing: 3px; margin-top: 1px; }
+.header-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+.header-live { display: flex; align-items: center; gap: 6px; }
+.header-live span { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--green); letter-spacing: 1px; }
+.header-met { text-align: right; }
+.header-met-label { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: var(--sub); letter-spacing: 2px; }
+.header-met-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: var(--amber); letter-spacing: 2px; }
+
+@media (max-width: 480px) {
+  .header-sub { display: none; }
+  .header-live { display: none; }
+}
+
+/* ══════════════════════════════════════════
+   EVENT BANNER
+══════════════════════════════════════════ */
+#event-banner {
+  display: none;
+  background: linear-gradient(90deg, rgba(192,96,255,.14), rgba(0,200,255,.08), rgba(192,96,255,.14));
+  border-top: 1px solid rgba(192,96,255,.35);
+  border-bottom: 1px solid rgba(192,96,255,.35);
+  padding: 10px 16px;
+  align-items: center; justify-content: center; gap: 10px;
+  animation: bannerPulse 2.5s ease-in-out infinite;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════════
+   CANVAS / TRAJECTORY
+══════════════════════════════════════════ */
+#cvwrap {
+  width: 100%; background: #010306; position: relative;
+  border-bottom: 1px solid var(--border); overflow: hidden; cursor: crosshair;
+}
+#cv { display: block; width: 100%; height: 380px; }
+@media(max-width:768px){ #cv { height: 240px; } }
+.cv-overlay {
+  position: absolute; bottom: 10px; right: 14px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+  pointer-events: none;
+}
+.cv-overlay span { font-family: 'Share Tech Mono', monospace; }
+#cv-tooltip {
+  position: absolute; pointer-events: none;
+  background: rgba(2,8,22,.96); border: 1px solid rgba(0,200,255,.4);
+  border-radius: 8px; padding: 10px 14px;
+  font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--cyan);
+  line-height: 1.8; display: none; z-index: 10; max-width: 210px;
+  box-shadow: 0 4px 24px rgba(0,200,255,.18);
+}
+
+/* ══════════════════════════════════════════
+   SECTION LABEL
+══════════════════════════════════════════ */
+.sec-label {
+  font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 3px;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.sec-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, currentColor, transparent);
+  opacity: .45;
+}
+
+/* ══════════════════════════════════════════
+   GLASS CARD
+══════════════════════════════════════════ */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, var(--cyan)), transparent);
+  opacity: .5;
+}
+.card-p { padding: 18px; }
+
+/* ══ Progress bar ══ */
+.pbar { height: 3px; background: rgba(0,200,255,.07); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.pbar-fill { height: 100%; border-radius: 2px; transition: width 1.2s ease; }
+
+/* ══════════════════════════════════════════
+   TELEMETRY ROW
+══════════════════════════════════════════ */
+.telem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px; }
+@media(max-width:768px){ .telem-grid { grid-template-columns: repeat(2, 1fr); } }
+.telem-item {}
+.telem-label { font-family:'Share Tech Mono',monospace; font-size:7px; letter-spacing:2px; color:var(--sub); }
+.telem-val   { font-family:'Orbitron',monospace; font-size:26px; font-weight:700; color:#fff; margin:4px 0 2px; line-height:1; }
+.telem-unit  { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--cyan); }
+
+/* ══════════════════════════════════════════
+   PHASE NAVIGATOR
+══════════════════════════════════════════ */
+.phase-nav {
+  display: flex; gap: 0; overflow-x: auto; padding-bottom: 4px;
+  scrollbar-width: thin; scrollbar-color: rgba(0,200,255,.3) transparent;
+}
+.phase-nav::-webkit-scrollbar { height: 3px; }
+.phase-nav::-webkit-scrollbar-thumb { background: rgba(0,200,255,.3); border-radius: 2px; }
+.pn-item {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  min-width: 80px; padding: 10px 6px 8px; position: relative; cursor: pointer;
+  transition: all .25s; border-radius: 8px;
+}
+.pn-item::after {
+  content: ''; position: absolute; top: 19px; right: -1px;
+  width: calc(100% - 16px); height: 1px; background: rgba(0,200,255,.18);
+}
+.pn-item:last-child::after { display: none; }
+.pn-item.pn-done  .pn-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.pn-item.pn-active .pn-dot { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); animation: blink 1.4s infinite; }
+.pn-item.pn-up     .pn-dot { background: rgba(255,255,255,.15); }
+.pn-item.pn-active { background: rgba(0,200,255,.06); }
+.pn-dot   { width: 9px; height: 9px; border-radius: 50%; margin-bottom: 6px; transition: all .3s; }
+.pn-icon  { font-size: 18px; margin-bottom: 4px; line-height: 1; }
+.pn-name  { font-family:'Orbitron',monospace; font-size:7px; text-align:center; letter-spacing:.3px; line-height:1.3; }
+.pn-item.pn-done   .pn-name { color: rgba(57,255,106,.75); }
+.pn-item.pn-active .pn-name { color: var(--cyan); }
+.pn-item.pn-up     .pn-name { color: var(--sub); }
+.pn-status { font-family:'Share Tech Mono',monospace; font-size:6px; margin-top:3px; text-align:center; }
+.pn-item.pn-done   .pn-status { color: rgba(57,255,106,.65); }
+.pn-item.pn-active .pn-status { color: var(--cyan); }
+.pn-item.pn-up     .pn-status { color: rgba(255,255,255,.18); }
+
+/* ══ Phase detail box ══ */
+.phase-detail {
+  margin-top: 12px; padding: 14px; border-radius: 8px;
+  background: rgba(0,200,255,.04); border: 1px solid rgba(0,200,255,.15);
+  display: flex; align-items: flex-start; gap: 12px; transition: all .3s;
+}
+.phase-detail-icon { font-size: 30px; flex-shrink: 0; line-height: 1.1; }
+
+/* ══════════════════════════════════════════
+   MAIN GRID (3-col)
+══════════════════════════════════════════ */
+.main-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;
+}
+@media(max-width:1024px){ .main-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:640px)  { .main-grid { grid-template-columns: 1fr; } }
+
+/* ══ Status pill ══ */
+.pill {
+  display: inline-block; padding: 4px 12px; border-radius: 4px;
+  font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px;
+  background: rgba(0,200,255,.1); border: 1px solid rgba(0,200,255,.35); color: var(--cyan);
+}
+
+/* ══ Mini data grid ══ */
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.mini-cell {
+  padding: 10px; border-radius: 8px;
+  background: rgba(0,8,25,.7); border: 1px solid var(--border);
+}
+.mini-cell-label { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--sub); }
+.mini-cell-val   { font-family:'Orbitron',monospace; font-size:15px; font-weight:600; margin-top:4px; }
+
+/* ══════════════════════════════════════════
+   COUNTDOWN (next event)
+══════════════════════════════════════════ */
+.countdown-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 14px; }
+.cd-box { text-align: center; }
+.cd-box-val {
+  font-family:'Orbitron',monospace; font-size:28px; font-weight:900;
+  color: #fff; line-height:1;
+}
+.cd-box-label { font-family:'Share Tech Mono',monospace; font-size:6px; color:var(--sub); letter-spacing:2px; margin-top:3px; }
+
+/* ══════════════════════════════════════════
+   CREW CARDS
+══════════════════════════════════════════ */
+.crew-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.crew-card {
+  background: rgba(0,6,20,.9); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 10px; text-align: center;
+  transition: all .25s; cursor: default;
+}
+.crew-card:hover { border-color: var(--cyan); transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,200,255,.18); }
+.crew-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0,80,180,.55), rgba(0,180,255,.25));
+  border: 2px solid var(--cyan); margin: 0 auto 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-family:'Orbitron',monospace; font-size:11px; font-weight:700; color:var(--cyan);
+  box-shadow: 0 0 12px rgba(0,200,255,.25);
+}
+.crew-name { font-family:'Orbitron',monospace; font-size:8px; font-weight:700; color:#fff; letter-spacing:.5px; }
+.crew-role { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--sub); margin-top:2px; }
+.crew-note { font-family:'Share Tech Mono',monospace; font-size:7px; color:rgba(0,200,255,.6); margin-top:4px; }
+
+/* ══════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════ */
+.tl-item { display:flex; gap:8px; align-items:flex-start; padding:6px 8px; border-radius:5px; margin-bottom:4px; }
+.tl-item.done   { background:rgba(0,255,100,.03); border:1px solid rgba(0,255,100,.1); }
+.tl-item.active { background:rgba(0,200,255,.05); border:1px solid rgba(0,200,255,.35); box-shadow:0 0 10px rgba(0,200,255,.1); }
+.tl-item.up     { border:1px solid rgba(255,255,255,.04); opacity:.5; }
+.tl-dot { width:7px; height:7px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.done   .tl-dot { background:var(--green); box-shadow:0 0 5px var(--green); }
+.active .tl-dot { background:var(--cyan); box-shadow:0 0 8px var(--cyan); animation:blink 1.4s infinite; }
+.up     .tl-dot { background:rgba(255,255,255,.2); }
+
+/* ══════════════════════════════════════════
+   SYSTEM STATUS
+══════════════════════════════════════════ */
+.sys-row {
+  display:flex; align-items:center; gap:8px; padding:5px 8px;
+  border-radius:5px; background:rgba(0,8,25,.5);
+  border:1px solid rgba(0,200,255,.05); margin-bottom:4px;
+}
+
+/* ══════════════════════════════════════════
+   FUN FACTS STRIP
+══════════════════════════════════════════ */
+.facts-strip {
+  display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
+  scrollbar-width: thin; scrollbar-color: var(--cyan) transparent;
+}
+.facts-strip::-webkit-scrollbar { height: 3px; }
+.facts-strip::-webkit-scrollbar-thumb { background:var(--cyan); border-radius:2px; }
+.fact-card {
+  flex-shrink: 0; min-width: 190px; padding: 16px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 12px; transition: border-color .25s;
+}
+.fact-card:hover { border-color: var(--border2); }
+.fact-icon  { font-size: 22px; margin-bottom: 6px; }
+.fact-label { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--sub); margin-bottom:4px; }
+.fact-val   { font-family:'Orbitron',monospace; font-size:18px; font-weight:700; color:#fff; }
+.fact-note  { font-family:'Share Tech Mono',monospace; font-size:7px; color:rgba(0,200,255,.65); margin-top:4px; }
+
+/* ══════════════════════════════════════════
+   EXPLAINER CARDS
+══════════════════════════════════════════ */
+.expl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+@media(max-width:900px){ .expl-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:580px){ .expl-grid { grid-template-columns:1fr; } }
+.expl-card {
+  background:var(--glass); border:1px solid var(--border);
+  border-radius:14px; padding:22px; position:relative; overflow:hidden;
+  transition:all .25s;
+}
+.expl-card:hover { border-color:rgba(0,200,255,.35); transform:translateY(-2px); }
+.expl-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--ec,var(--cyan)), transparent);
+}
+.expl-icon {
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; margin-bottom:16px;
+  background:rgba(0,200,255,.07); border:1px solid rgba(0,200,255,.2);
+}
+.expl-title { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:#fff; letter-spacing:.5px; margin-bottom:10px; }
+.expl-body  { font-size:14px; color:var(--txt); line-height:1.7; }
+.expl-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.expl-stat {
+  padding:10px; border-radius:8px; text-align:center;
+  background:rgba(0,200,255,.06); border:1px solid rgba(0,200,255,.15);
+}
+.expl-stat-val  { font-family:'Orbitron',monospace; font-size:16px; color:#fff; }
+.expl-stat-lbl  { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--sub); margin-top:2px; }
+
+/* ══════════════════════════════════════════
+   BOOK AD
+══════════════════════════════════════════ */
+.book-ad {
+  background: linear-gradient(135deg, rgba(4,12,30,.98), rgba(20,10,0,.98));
+  border: 1px solid rgba(255,215,0,.22); border-radius: 14px;
+  padding: 22px; position: relative; overflow: hidden; transition: border-color .3s;
+}
+.book-ad:hover { border-color: rgba(255,215,0,.45); }
+.book-ad::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,.6), transparent);
+}
+.book-ad-badge {
+  position:absolute; top:12px; right:14px;
+  font-family:'Share Tech Mono',monospace; font-size:7px; letter-spacing:1.5px;
+  color:rgba(255,215,0,.35); border:1px solid rgba(255,215,0,.15);
+  padding:2px 7px; border-radius:3px;
+}
+.book-inner { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.book-cover {
+  width:90px; height:130px; flex-shrink:0; border-radius:8px;
+  background: linear-gradient(160deg, #0d1a33, #060c1a);
+  border:2px solid rgba(255,215,0,.3); display:flex; align-items:center;
+  justify-content:center; font-size:44px;
+  box-shadow:0 0 20px rgba(255,215,0,.1), inset 0 0 20px rgba(0,0,0,.5);
+}
+.book-body { flex:1; min-width:0; }
+.book-tag  { font-family:'Share Tech Mono',monospace; font-size:8px; color:rgba(255,215,0,.55); letter-spacing:2px; margin-bottom:6px; }
+.book-title{ font-family:'Orbitron',monospace; font-size:18px; font-weight:700; color:#fff; line-height:1.3; margin-bottom:4px; }
+.book-author{ font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,215,0,.75); margin-bottom:12px; }
+.book-desc { font-size:13px; color:var(--sub); line-height:1.7; margin-bottom:18px; }
+.book-cta {
+  display:inline-flex; align-items:center; gap:8px; padding:11px 22px;
+  border-radius:8px; background:linear-gradient(90deg,#ffd700,#ffaa00);
+  color:#000; font-family:'Orbitron',monospace; font-size:9px; font-weight:700;
+  letter-spacing:1px; text-decoration:none; transition:all .2s;
+}
+.book-cta:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(255,215,0,.35); }
+
+/* ══════════════════════════════════════════
+   YOUTUBE SECTION
+══════════════════════════════════════════ */
+.yt-wrap {
+  position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden;
+  background:#000; border:1px solid var(--border); cursor:pointer;
+}
+.yt-inner {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px;
+  background:linear-gradient(135deg,#0a0010,#000820); transition:background .2s;
+}
+.yt-wrap:hover .yt-inner { background:linear-gradient(135deg,#120022,#001236); }
+.yt-play {
+  width:68px; height:68px; border-radius:50%; background:#ff0000;
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  box-shadow:0 0 36px rgba(255,0,0,.55); transition:transform .2s,box-shadow .2s;
+  position:relative;
+}
+.yt-play::after { content:'▶'; color:#fff; margin-left:5px; }
+.yt-wrap:hover .yt-play { transform:scale(1.12); box-shadow:0 0 56px rgba(255,0,0,.75); }
+.yt-thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.4; }
+.yt-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+.yt-small {
+  padding-top:0; height:90px; border-radius:10px;
+}
+.yt-small .yt-inner { border-radius:10px; }
+.yt-btn {
+  display:inline-flex; align-items:center; gap:8px; padding:10px 20px;
+  border-radius:7px; background:#cc0000; color:#fff;
+  font-family:'Orbitron',monospace; font-size:10px; letter-spacing:1px;
+  text-decoration:none; transition:all .2s;
+}
+.yt-btn:hover { background:#ff0000; transform:translateY(-1px); }
+.live-badge {
+  display:inline-flex; align-items:center; gap:5px; padding:3px 9px;
+  border-radius:4px; background:rgba(255,0,0,.15); border:1px solid rgba(255,0,0,.4);
+  font-family:'Share Tech Mono',monospace; font-size:8px; color:#ff5050; letter-spacing:1px;
+}
+.live-badge .dot { width:6px; height:6px; border-radius:50%; background:#ff3030; animation:blink 1.2s infinite; }
+.yt-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
+@media(max-width:640px){ .yt-grid { grid-template-columns:1fr; } }
+.yt-mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media(max-width:640px){ .yt-mini-grid { grid-template-columns:repeat(2,1fr); } }
+.yt-notice {
+  padding:14px 16px; border-radius:10px; display:flex; align-items:flex-start; gap:12px;
+  background:rgba(255,0,0,.06); border:1px solid rgba(255,0,0,.2); margin-bottom:16px;
+}
+.yt-notice-icon { font-size:20px; flex-shrink:0; }
+
+/* ══════════════════════════════════════════
+   NEWS CARDS
+══════════════════════════════════════════ */
+.news-outer-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+@media(max-width:900px){ .news-outer-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:580px){ .news-outer-grid { grid-template-columns:1fr; } }
+.news-card {
+  background:var(--glass); border:1px solid var(--border);
+  border-radius:12px; padding:18px; display:flex; flex-direction:column;
+  gap:10px; transition:all .25s; animation:fadeUp .4s ease both;
+  text-decoration: none; cursor: pointer;
+}
+.news-card:hover { border-color:rgba(0,200,255,.35); transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,200,255,.1); }
+.news-src-badge {
+  font-family:'Share Tech Mono',monospace; font-size:8px; letter-spacing:1px;
+  color:var(--cyan); background:rgba(0,200,255,.09); border:1px solid rgba(0,200,255,.22);
+  padding:2px 8px; border-radius:4px; display:inline-block; width:fit-content;
+}
+.news-title { font-size:14px; color:var(--txt); line-height:1.5; font-weight:500; text-decoration:none; flex:1; }
+.news-meta  { display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
+.news-date  { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--sub); }
+.news-read  { font-family:'Orbitron',monospace; font-size:8px; color:var(--cyan); text-decoration:none; letter-spacing:.5px; }
+.news-read:hover { color:#fff; }
+.news-loading {
+  text-align:center; padding:50px;
+  font-family:'Orbitron',monospace; font-size:11px;
+  letter-spacing:2px; color:var(--sub); grid-column:1/-1;
+}
+
+/* ══════════════════════════════════════════
+   LIVE DATA PANEL
+══════════════════════════════════════════ */
+.live-row { margin-bottom:14px; }
+.live-row-label { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--sub); letter-spacing:1px; margin-bottom:4px; }
+.live-row-val {
+  font-family:'Orbitron',monospace; font-size:20px; font-weight:700; color:#fff; line-height:1.2;
+}
+.live-row-unit { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--cyan); margin-left:4px; }
+.live-row-note { font-family:'Share Tech Mono',monospace; font-size:7px; color:rgba(0,200,255,.35); margin-top:2px; }
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer {
+  margin-top: auto; border-top: 1px solid var(--border); padding: 14px 16px;
+  background: rgba(1,4,12,.97);
+}
+.footer-inner {
+  max-width:1320px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+.footer-copy { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--sub); }
+.footer-legal{ font-family:'Share Tech Mono',monospace; font-size:6px; color:rgba(0,200,255,.2); margin-top:3px; }
+.footer-right{ display:flex; align-items:center; gap:16px; }
+.footer-upd  { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--sub); }
+.dsn-bars    { display:flex; align-items:flex-end; gap:2px; }
+.dsn-bar     { width:3px; border-radius:1px; background:var(--cyan); }
+
+/* ══════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════ */
+::-webkit-scrollbar        { width:4px; height:4px; }
+::-webkit-scrollbar-track  { background:transparent; }
+::-webkit-scrollbar-thumb  { background:rgba(0,200,255,.3); border-radius:2px; }
+
+/* ══════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════ */
+.flex       { display:flex; }
+.flex-col   { flex-direction:column; }
+.items-center { align-items:center; }
+.items-start  { align-items:flex-start; }
+.justify-between { justify-content:space-between; }
+.gap-2  { gap:6px; }
+.gap-3  { gap:10px; }
+.gap-4  { gap:14px; }
+.flex-1 { flex:1; }
+.flex-shrink-0 { flex-shrink:0; }
+.min-w-0 { min-width:0; }
+.wrap { flex-wrap:wrap; }
+.mb-1{ margin-bottom:4px; }
+.mb-2{ margin-bottom:8px; }
+.mb-3{ margin-bottom:12px; }
+.mb-4{ margin-bottom:16px; }
+.mt-1{ margin-top:4px; }
+.mt-2{ margin-top:8px; }
+.mt-3{ margin-top:12px; }
+.mt-4{ margin-top:16px; }
+.pt-3{ padding-top:12px; }
+.pb-4{ padding-bottom:16px; }
+.px-4{ padding-left:16px; padding-right:16px; }
+.w-full{ width:100%; }
+.text-white { color:#fff; }
+.font-bold  { font-weight:700; }
+.border-top { border-top:1px solid var(--border); }
+.relative   { position:relative; }
+.overflow-hidden { overflow:hidden; }
+.inline-flex { display:inline-flex; }
+.text-center { text-align:center; }
+.section-gap { padding-bottom:24px; }
+</style>
+<!-- Yandex.RTB -->
+<script>window.yaContextCb=window.yaContextCb||[]</script>
+<script src="https://yandex.ru/ads/system/context.js" async></script>
+</head>
+<body>
+<div id="sf"></div>
+<div class="page">
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <span class="header-icon">🚀</span>
+      <div class="header-divider"></div>
+      <div class="min-w-0">
+        <div class="header-title shine">АРТЕМИДА II</div>
+        <div class="header-sub">ПЕРВЫЙ ПОЛЁТ ЛЮДЕЙ К ЛУНЕ ЗА 53 ГОДА</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-live">
+        <div class="ldot"></div>
+        <span>В ПОЛЁТЕ</span>
+      </div>
+      <div class="header-met">
+        <div class="header-met-label">ВРЕМЯ ПОЛЁТА</div>
+        <div class="header-met-val orb" id="h-met">T+00:00:00</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ EVENT BANNER ══ -->
+<div id="event-banner">
+  <span id="event-banner-text" class="mono" style="font-size:10px;color:#c060ff;letter-spacing:1px"></span>
+</div>
+
+<!-- ══ CANVAS TRAJECTORY ══ -->
+<div id="cvwrap">
+  <canvas id="cv"></canvas>
+  <div class="cv-overlay">
+    <span class="mono" style="font-size:7px;color:rgba(0,200,255,.5);letter-spacing:1px">← ЗЕМЛЯ ·········· ЛУНА →</span>
+    <span class="mono" style="font-size:6px;color:rgba(0,200,255,.22)">Интерактивная карта · наведите курсор</span>
+  </div>
+  <div id="cv-tooltip"></div>
+</div>
+
+<!-- ══ TELEMETRY ══ -->
+<div class="wrap section-gap" style="padding-top:16px">
+  <div class="card">
+    <div class="telem-grid">
+      <div class="telem-item">
+        <div class="telem-label">СКОРОСТЬ</div>
+        <div class="telem-val" id="v-speed">--</div>
+        <div class="telem-unit">КМ/ЧАС</div>
+        <div class="pbar"><div class="pbar-fill" id="b-speed" style="background:linear-gradient(90deg,var(--cyan),var(--green))"></div></div>
+      </div>
+      <div class="telem-item">
+        <div class="telem-label">ОТ ЗЕМЛИ</div>
+        <div class="telem-val" id="v-de">--</div>
+        <div class="telem-unit">КМ</div>
+        <div class="pbar"><div class="pbar-fill" id="b-de" style="background:linear-gradient(90deg,#4080ff,var(--cyan))"></div></div>
+      </div>
+      <div class="telem-item">
+        <div class="telem-label">ДО ЛУНЫ</div>
+        <div class="telem-val" id="v-dm">--</div>
+        <div class="telem-unit">КМ</div>
+        <div class="pbar"><div class="pbar-fill" id="b-dm" style="background:linear-gradient(90deg,var(--purple),var(--orange))"></div></div>
+      </div>
+      <div class="telem-item">
+        <div class="telem-label">ПРОГРЕСС</div>
+        <div class="telem-val" id="v-prog" style="color:var(--green)">--</div>
+        <div class="telem-unit" style="color:var(--green)">% ЗАВЕРШЕНО</div>
+        <div class="pbar"><div class="pbar-fill" id="b-prog" style="background:linear-gradient(90deg,var(--green),#60ffaa)"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE NAVIGATOR ══ -->
+<div class="wrap section-gap">
+  <div class="card card-p" style="--card-accent:var(--amber)">
+    <div class="sec-label" style="color:var(--amber)">Этапы полёта · нажмите для подробностей</div>
+    <div class="phase-nav" id="phase-nav"></div>
+    <div class="phase-detail" id="phase-detail-box">
+      <div class="phase-detail-icon" id="phase-detail-icon">🚀</div>
+      <div>
+        <div class="orb font-bold mb-1" id="phase-detail-name" style="font-size:11px;color:#fff;letter-spacing:1px">ЗАГРУЗКА...</div>
+        <div class="mono" id="phase-detail-desc" style="font-size:10px;color:var(--sub);line-height:1.7">Вычисление текущего этапа...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN GRID ══ -->
+<div class="wrap section-gap">
+  <div class="main-grid">
+
+    <!-- COL 1: STATUS -->
+    <div class="flex flex-col gap-4">
+      <div class="card card-p">
+        <div class="sec-label">Статус полёта</div>
+        <div class="mono mb-1" style="font-size:7px;letter-spacing:2px;color:var(--sub)">ТЕКУЩАЯ ФАЗА</div>
+        <div class="pill" id="v-phase">ЗАГРУЗКА…</div>
+        <div class="mt-3" id="v-phasedesc" style="font-size:14px;color:var(--txt);line-height:1.65"></div>
+        <div class="mini-grid pt-3 border-top">
+          <div class="mini-cell">
+            <div class="mini-cell-label">Перегрузка</div>
+            <div class="mini-cell-val" id="v-g" style="color:var(--amber)">-- g</div>
+          </div>
+          <div class="mini-cell">
+            <div class="mini-cell-label">Задержка сигнала</div>
+            <div class="mini-cell-val" id="v-sig" style="color:var(--cyan)">-- с</div>
+          </div>
+          <div class="mini-cell">
+            <div class="mini-cell-label">Кабина (экипаж)</div>
+            <div class="mini-cell-val" id="v-tca" style="color:var(--green)">-- °C</div>
+          </div>
+          <div class="mini-cell">
+            <div class="mini-cell-label">Пройдено</div>
+            <div class="mini-cell-val" id="v-td" style="color:var(--txt)">-- км</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUNTDOWN -->
+      <div class="card card-p" style="--card-accent:var(--purple)">
+        <div class="sec-label" style="color:var(--purple)">Ближайшее событие</div>
+        <div class="mono mb-3" style="font-size:9px;letter-spacing:2px" id="next-event-name">ЗАГРУЗКА...</div>
+        <div class="countdown-grid" id="cd-wrap">
+          <div class="cd-box"><div class="cd-box-val orb" id="cd-d">--</div><div class="cd-box-label">ДНИ</div></div>
+          <div class="cd-box"><div class="cd-box-val orb" id="cd-h">--</div><div class="cd-box-label">ЧАС</div></div>
+          <div class="cd-box"><div class="cd-box-val orb" id="cd-m">--</div><div class="cd-box-label">МИН</div></div>
+          <div class="cd-box"><div class="cd-box-val orb" id="cd-s">--</div><div class="cd-box-label">СЕК</div></div>
+        </div>
+        <div style="height:1px;background:rgba(192,96,255,.2);margin-bottom:10px"></div>
+        <div class="mono" id="next-event-desc" style="font-size:9px;color:var(--sub);line-height:1.7">
+          Орион пройдёт в 9 650 км от поверхности Луны. Сила лунного притяжения автоматически развернёт корабль к Земле — <strong style="color:var(--purple)">гравитационный манёвр</strong>.
+        </div>
+      </div>
+
+      <!-- SYSTEMS -->
+      <div class="card card-p">
+        <div class="sec-label">Системы корабля</div>
+        <div id="syslist"></div>
+      </div>
+    </div>
+
+    <!-- COL 2: CREW + FACTS -->
+    <div class="flex flex-col gap-4">
+      <div class="card card-p">
+        <div class="sec-label">Экипаж Ориона</div>
+        <div class="crew-grid mb-4" id="crew-grid"></div>
+        <div style="padding:12px 14px;border-radius:10px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.18);border-left:3px solid var(--cyan)">
+          <div class="mono mb-1" style="font-size:7px;letter-spacing:2px;color:var(--cyan)">О МИССИИ</div>
+          <div class="orb" style="font-size:9px;color:#fff;line-height:1.7">
+            Артемида II — первый испытательный полёт с экипажем. Облёт Луны по траектории свободного возврата. Современный аналог «Аполлона-8» (1968). Посадки не будет — генеральная репетиция для Артемиды III.
+          </div>
+        </div>
+      </div>
+
+      <!-- KEY FACTS -->
+      <div class="card card-p">
+        <div class="sec-label">Ключевые факты</div>
+        <div id="keyfacts"></div>
+      </div>
+
+      <!-- LIVE PERSPECTIVE -->
+      <div class="card card-p" style="--card-accent:var(--amber)">
+        <div class="sec-label" style="color:var(--amber)">В перспективе</div>
+        <div class="live-row">
+          <div class="live-row-label">📡 Задержка сигнала (скорость света)</div>
+          <div class="live-row-val"><span id="fl-sig">--</span><span class="live-row-unit">сек</span></div>
+          <div class="live-row-note">радиосигнал от Земли летит именно столько</div>
+        </div>
+        <div class="live-row">
+          <div class="live-row-label">🌍 Расстояние в земных экваторах</div>
+          <div class="live-row-val"><span id="fl-laps">--</span><span class="live-row-unit">× вокруг Земли</span></div>
+          <div class="live-row-note">экватор = 40 075 км</div>
+        </div>
+        <div class="live-row">
+          <div class="live-row-label">🚗 На машине 120 км/ч добирался бы</div>
+          <div class="live-row-val"><span id="fl-days">--</span><span class="live-row-unit">лет</span></div>
+        </div>
+        <div class="live-row">
+          <div class="live-row-label">🌡️ Температура вне корабля</div>
+          <div class="live-row-val" style="font-size:16px"><span id="fl-temp">--</span></div>
+          <div class="live-row-note">солн. сторона / теневая сторона</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: TIMELINE -->
+    <div class="card card-p" style="max-height:740px;overflow-y:auto">
+      <div class="sec-label">Хронология миссии</div>
+      <div id="timeline"></div>
+    </div>
+
+  </div>
+</div>
+<!-- Вариант 3: Звездный трек -->
+<div class="startrack-container">
+    <canvas id="particlesCanvas" class="particles-bg"></canvas>
+    
+    <div class="startrack-card">
+        <div class="card-glow"></div>
+        
+        <div class="cosmic-badge">
+            <span class="badge-star">⭐</span>
+            <span class="badge-text">ЭКСКЛЮЗИВНОЕ ПРЕДЛОЖЕНИЕ</span>
+            <span class="badge-star">⭐</span>
+        </div>
+        
+        <h2 class="startrack-title">
+            <span class="title-line">Откройте</span>
+            <span class="title-highlight">T-Bank Black</span>
+            <span class="title-line">и получите</span>
+        </h2>
+        
+        <div class="bonus-display">
+            <div class="bonus-amount">500₽</div>
+            <div class="bonus-label">на орбитальный счет</div>
+        </div>
+        
+        <div class="features-orbit">
+            <div class="feature-planet">
+                <span class="planet-emoji">💰</span>
+                <span class="planet-text">Деньги, не бонусы</span>
+            </div>
+            <div class="feature-planet">
+                <span class="planet-emoji">🚀</span>
+                <span class="planet-text">Мгновенный кэшбэк</span>
+            </div>
+            <div class="feature-planet">
+                <span class="planet-emoji">✨</span>
+                <span class="planet-text">Без лимитов</span>
+            </div>
+        </div>
+        
+        <a href="https://tbank.ru/baf/8joG2uxsyMt" target="_blank" class="startrack-btn">
+            <span class="btn-text">🌌 Начать космическое путешествие</span>
+            <span class="btn-shimmer"></span>
+        </a>
+        
+        <div class="fine-print">
+            * При оформлении по реферальной ссылке
+        </div>
+    </div>
+</div>
+
+<style>
+.startrack-container {
+    position: relative;
+    max-width: 650px;
+    margin: 60px auto;
+    padding: 20px;
+}
+
+.particles-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.startrack-card {
+    position: relative;
+    background: linear-gradient(145deg, 
+        rgba(138, 43, 226, 0.15) 0%, 
+        rgba(75, 0, 130, 0.2) 50%, 
+        rgba(25, 25, 112, 0.15) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 35px;
+    padding: 45px 40px;
+    box-shadow: 0 20px 70px rgba(138, 43, 226, 0.3),
+                inset 0 0 60px rgba(255, 215, 0, 0.05);
+}
+
+.card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 0, 110, 0.15) 0%, transparent 70%);
+    animation: rotate-glow 10s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cosmic-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.badge-star {
+    font-size: 16px;
+    animation: twinkle-star 2s ease-in-out infinite;
+}
+
+.badge-star:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes twinkle-star {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.badge-text {
+    color: #ffd700;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.startrack-title {
+    text-align: center;
+    margin: 20px 0 30px;
+    line-height: 1.3;
+}
+
+.title-line {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 22px;
+    font-weight: 300;
+    font-family: 'Source Sans 3', sans-serif;
+}
+
+.title-highlight {
+    display: block;
+    color: #ffd700;
+    font-size: 48px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 10px 0;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
+                 0 0 60px rgba(255, 215, 0, 0.3);
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+    50% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.9), 0 0 80px rgba(255, 215, 0, 0.5); }
+}
+
+.bonus-display {
+    text-align: center;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 25px;
+    margin: 30px 0;
+    border: 2px dashed rgba(255, 215, 0, 0.3);
+}
+
+.bonus-amount {
+    font-size: 64px;
+    font-weight: 900;
+    color: #00ff88;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+    line-height: 1;
+}
+
+.bonus-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.features-orbit {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.feature-planet {
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+    padding: 20px 15px;
+    background: rgba(255, 215, 0, 0.08);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    transition: all 0.3s;
+}
+
+.feature-planet:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 215, 0, 0.15);
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
+.planet-emoji {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 10px;
+    animation: bounce-planet 2s infinite;
+}
+
+.feature-planet:nth-child(2) .planet-emoji {
+    animation-delay: 0.3s;
+}
+
+.feature-planet:nth-child(3) .planet-emoji {
+    animation-delay: 0.6s;
+}
+
+@keyframes bounce-planet {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.planet-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.startrack-btn {
+    display: block;
+    position: relative;
+    padding: 22px 40px;
+    background: linear-gradient(135deg, #ff006e 0%, #8b00ff 50%, #4da6ff 100%);
+    background-size: 200% 100%;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 18px;
+    text-align: center;
+    margin: 30px 0 20px;
+    box-shadow: 0 10px 40px rgba(255, 0, 110, 0.4);
+    transition: all 0.4s;
+    overflow: hidden;
+}
+
+.btn-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 200%; }
+}
+
+.startrack-btn:hover {
+    transform: scale(1.05);
+    background-position: 100% 0;
+    box-shadow: 0 15px 50px rgba(255, 0, 110, 0.6);
+}
+
+.fine-print {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    font-style: italic;
+}
+
+@media (max-width: 640px) {
+    .startrack-container {
+        margin: 40px 10px;
+        padding: 10px;
+    }
+    .startrack-card {
+        padding: 35px 25px;
+    }
+    .title-highlight {
+        font-size: 36px;
+    }
+    .bonus-amount {
+        font-size: 48px;
+    }
+    .features-orbit {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Анимация частиц для варианта 3
+(function() {
+    const canvas = document.getElementById('particlesCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    const particles = [];
+    const particleCount = 50;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+        
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        
+        draw() {
+            ctx.fillStyle = `rgba(255, 215, 0, ${this.opacity})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    });
+})();
+</script>
+<!-- ══ MISSION EXPLAINER ══ -->
+<div class="wrap section-gap">
+  <div class="mono mb-3" style="font-size:9px;letter-spacing:3px;color:var(--cyan)">КАК ЭТО РАБОТАЕТ</div>
+  <div class="expl-grid">
+    <div class="expl-card" style="--ec:var(--cyan)">
+      <div class="expl-icon">🛸</div>
+      <div class="expl-title">Корабль Орион</div>
+      <div class="expl-body">
+        <strong style="color:var(--cyan)">Orion MPCV</strong> — многоцелевой пилотируемый корабль NASA. Кабина рассчитана на 4 человека. Теплозащитный щит диаметром <strong style="color:var(--amber)">5 метров</strong> — крупнейший в истории.
+      </div>
+      <div class="expl-stat-row">
+        <div class="expl-stat"><div class="expl-stat-val">4</div><div class="expl-stat-lbl">АСТРОНАВТА</div></div>
+        <div class="expl-stat"><div class="expl-stat-val">21.3 т</div><div class="expl-stat-lbl">МАССА</div></div>
+      </div>
+    </div>
+    <div class="expl-card" style="--ec:var(--orange)">
+      <div class="expl-icon" style="background:rgba(255,107,53,.07);border-color:rgba(255,107,53,.2)">🌙</div>
+      <div class="expl-title">Траектория облёта</div>
+      <div class="expl-body">
+        Орион летит по <strong style="color:var(--orange)">траектории свободного возврата</strong>: пролетает мимо Луны, её гравитация разворачивает корабль обратно к Земле. Если двигатели откажут — физика сама вернёт экипаж домой.
+      </div>
+      <div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2)">
+        <div class="mono" style="font-size:8px;color:rgba(255,107,53,.9)">⚡ ВСТРОЕННАЯ ЗАЩИТА</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5">Только гравитация — безопасное возвращение гарантировано без двигателей</div>
+      </div>
+    </div>
+    <div class="expl-card" style="--ec:var(--amber)">
+      <div class="expl-icon" style="background:rgba(255,184,48,.07);border-color:rgba(255,184,48,.2)">🔥</div>
+      <div class="expl-title">Возвращение домой</div>
+      <div class="expl-body">
+        При входе в атмосферу скорость — <strong style="color:var(--amber)">40 000 км/ч</strong>. Щит нагреется до <strong style="color:#ff4020">2 760°С</strong> — горячее поверхности Солнца. Внутри при этом +21°С.
+      </div>
+      <div class="expl-stat-row">
+        <div class="expl-stat" style="background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.15)">
+          <div class="expl-stat-val" style="color:var(--amber)">2 760°C</div><div class="expl-stat-lbl">СНАРУЖИ</div>
+        </div>
+        <div class="expl-stat" style="background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.15)">
+          <div class="expl-stat-val" style="color:var(--green)">+21°C</div><div class="expl-stat-lbl">В КАБИНЕ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FUN FACTS ══ -->
+<div class="wrap section-gap">
+  <div class="mono mb-3" style="font-size:9px;letter-spacing:3px;color:var(--cyan)">ИНТЕРЕСНО ЗНАТЬ</div>
+  <div class="facts-strip">
+    <div class="fact-card"><div class="fact-icon">🕰️</div><div class="fact-label">Пауза между миссиями</div><div class="fact-val">53 года</div><div class="fact-note">С «Аполлона-17», декабрь 1972</div></div>
+    <div class="fact-card"><div class="fact-icon">👩‍🚀</div><div class="fact-label">Первая женщина к Луне</div><div class="fact-val">Кристина Кох</div><div class="fact-note">Рекорд непрерывного полёта среди женщин</div></div>
+    <div class="fact-card"><div class="fact-icon">⚡</div><div class="fact-label">Тяга ракеты SLS Block I</div><div class="fact-val">39.1 МН</div><div class="fact-note">Мощнейшая ракета NASA за всю историю</div></div>
+    <div class="fact-card"><div class="fact-icon">🌡️</div><div class="fact-label">Нагрев при входе</div><div class="fact-val">2 760°C</div><div class="fact-note">Горячее поверхности Солнца</div></div>
+    <div class="fact-card"><div class="fact-icon">🌍</div><div class="fact-label">Рекорд удалённости</div><div class="fact-val">&gt;400 000 км</div><div class="fact-note">Превзойдёт рекорд «Аполлона-13»</div></div>
+    <div class="fact-card"><div class="fact-icon">🏁</div><div class="fact-label">Следующий шаг</div><div class="fact-val">Артемида III</div><div class="fact-note">Первая высадка на Луну с 1972 года</div></div>
+    <div class="fact-card"><div class="fact-icon">🇨🇦</div><div class="fact-label">Первый канадец к Луне</div><div class="fact-val">Дж. Хансен</div><div class="fact-note">Канадское космическое агентство</div></div>
+</div>
+<div class="wrap section-gap" style="display: flex; justify-content: center;">
+  <div id="yandex_rtb_R-A-19061750-1"></div>
+  <script>
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            "blockId": "R-A-19061750-1",
+            "renderTo": "yandex_rtb_R-A-19061750-1"
+        })
+    })
+  </script>
+</div>
+<!-- Кнопка донатов -->
+<div style="text-align: center; margin: 40px 0;">
+    <a href="https://pay.cloudtips.ru/p/86ef4a35" 
+       target="_blank"
+       style="display: inline-block; 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 16px 40px;
+              border-radius: 50px;
+              text-decoration: none;
+              font-weight: bold;
+              font-size: 18px;
+              box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+              transition: transform 0.2s, box-shadow 0.2s;">
+        ❤️ Поддержать миссию
+    </a>
+</div>
+
+<style>
+    a[href*="cloudtips"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+</style>
+<!-- ══ NASA VIDEO ══ -->
+<div class="wrap section-gap">
+  <div class="mono mb-3" style="font-size:9px;letter-spacing:3px;color:#ff4040">● ВИДЕО И ТРАНСЛЯЦИИ NASA</div>
+  <div class="card card-p" style="--card-accent:#ff3030">
+    <div class="flex items-center justify-between mb-4 wrap gap-3">
+      <div>
+        <div class="orb font-bold mb-1" style="font-size:15px;color:#fff">NASA TV — Видеолента Артемиды II</div>
+        <div class="mono" style="font-size:9px;color:var(--sub)">Нажмите на превью для воспроизведения · Официальный канал NASA</div>
+      </div>
+      <a href="https://www.youtube.com/@NASAtelevision/streams" target="_blank" rel="noopener" class="yt-btn">▶ Открыть на YouTube</a>
+    </div>
+
+    <div class="yt-notice">
+      <div class="yt-notice-icon">📡</div>
+      <div>
+        <div class="orb mb-1" style="font-size:9px;color:#ff6060">О ПРЯМОМ ЭФИРЕ NASA</div>
+        <div class="mono" style="font-size:8px;color:var(--sub);line-height:1.7">NASA TV транслирует ключевые события — стыковки, пресс-конференции, выходы в открытый космос. Нажмите «ПРЯМОЙ ЭФИР» ниже или откройте YouTube. В перерывах эфир может быть заменён программами.</div>
+      </div>
+    </div>
+
+    <div class="yt-grid">
+      <!-- NASA TV Live -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="live-badge"><span class="dot"></span> ПРЯМОЙ ЭФИР</span>
+          <span class="mono" style="font-size:7px;color:var(--sub)">NASA Television</span>
+        </div>
+        <div class="yt-wrap" id="yt1" onclick="loadYT('yt1','UCxONMnxMIRgBE_EbO50dsKg','live')">
+          <div class="yt-inner">
+            <div style="position:absolute;top:12px;left:14px;display:flex;align-items:center;gap:6px">
+              <div class="ldot"></div>
+              <span class="mono" style="font-size:8px;color:#ff5050;letter-spacing:1px">ПРЯМОЙ ЭФИР</span>
+            </div>
+            <div class="yt-play"></div>
+            <div class="orb" style="font-size:11px;color:#fff;letter-spacing:1px;text-align:center;position:relative">NASA TV</div>
+            <div class="mono" style="font-size:8px;color:var(--sub);text-align:center;position:relative">Нажмите для загрузки</div>
+          </div>
+        </div>
+        <div class="mono mt-2" style="font-size:7px;color:rgba(255,255,255,.25);line-height:1.6">
+          ⚡ Если видео не загружается — эфир прерван. Откройте YouTube по кнопке выше.
+        </div>
+      </div>
+      <!-- Mission overview -->
+      <div>
+        <div class="mono mb-2" style="font-size:8px;letter-spacing:2px;color:var(--sub)">АРТЕМИДА II — ОБЗОР МИССИИ</div>
+        <div class="yt-wrap" id="yt2" onclick="loadYT('yt2','cKKy7Q2BNCA')">
+          <div class="yt-inner">
+            <img src="https://i.ytimg.com/vi/cKKy7Q2BNCA/hqdefault.jpg" class="yt-thumb-img" onerror="this.style.display='none'" alt="">
+            <div class="yt-play"></div>
+            <div class="orb" style="font-size:11px;color:#fff;letter-spacing:1px;text-align:center;position:relative">Корабль Орион изнутри</div>
+            <div class="mono" style="font-size:8px;color:var(--sub);text-align:center;position:relative">NASA · официальный обзор</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="yt-mini-grid">
+      <div class="yt-wrap yt-small" id="yt3" onclick="loadYT('yt3','BVdnG2LJhHM')">
+        <div class="yt-inner">
+          <img src="https://i.ytimg.com/vi/BVdnG2LJhHM/mqdefault.jpg" class="yt-thumb-img" onerror="this.style.display='none'" alt="">
+          <div style="font-size:22px;position:relative">🚀</div>
+          <div class="mono" style="font-size:7px;color:var(--cyan);text-align:center;position:relative">Старт SLS</div>
+        </div>
+      </div>
+      <div class="yt-wrap yt-small" id="yt4" onclick="loadYT('yt4','LmC8eFO-FhA')">
+        <div class="yt-inner">
+          <img src="https://i.ytimg.com/vi/LmC8eFO-FhA/mqdefault.jpg" class="yt-thumb-img" onerror="this.style.display='none'" alt="">
+          <div style="font-size:22px;position:relative">👨‍👩‍👧‍👦</div>
+          <div class="mono" style="font-size:7px;color:var(--cyan);text-align:center;position:relative">Знакомство с экипажем</div>
+        </div>
+      </div>
+      <a href="https://www.youtube.com/@NASAtelevision/streams" target="_blank" rel="noopener"
+         class="yt-wrap yt-small" style="text-decoration:none;background:rgba(255,0,0,.06);border:1px solid rgba(255,0,0,.2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:12px;border-radius:10px;padding-top:0;height:90px"
+         onmouseover="this.style.borderColor='rgba(255,0,0,.5)'" onmouseout="this.style.borderColor='rgba(255,0,0,.2)'">
+        <div style="font-size:22px">📡</div>
+        <div class="mono" style="font-size:7px;color:#ff6060;text-align:center">Все эфиры NASA</div>
+      </a>
+      <a href="https://www.nasa.gov/blogs/artemis/" target="_blank" rel="noopener"
+         class="yt-wrap yt-small" style="text-decoration:none;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:12px;border-radius:10px;padding-top:0;height:90px"
+         onmouseover="this.style.borderColor='rgba(0,200,255,.4)'" onmouseout="this.style.borderColor='rgba(0,200,255,.15)'">
+        <div style="font-size:22px">📝</div>
+        <div class="mono" style="font-size:7px;color:var(--cyan);text-align:center">Блог миссии NASA</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NEWS FEED ══ -->
+<div class="wrap section-gap">
+  <div class="flex items-center justify-between mb-3 wrap gap-2">
+    <div class="mono" style="font-size:9px;letter-spacing:3px;color:var(--cyan)">ПОСЛЕДНИЕ НОВОСТИ</div>
+    <div class="flex items-center gap-2">
+      <div class="ldot"></div>
+      <span class="mono" style="font-size:8px;color:var(--sub)">Google News · обновляется автоматически</span>
+    </div>
+  </div>
+  <div id="news-grid">
+    <div class="news-outer-grid">
+      <div class="news-loading">
+        <div style="animation:blink 1.4s infinite;display:inline-block;margin-right:8px">⟳</div> Загружаем новости об Артемиде II...
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-3">
+    <a href="https://news.google.com/search?q=Artemis+II+NASA&hl=ru" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:7px;border:1px solid var(--border);color:var(--sub);text-decoration:none;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;transition:all .2s"
+       onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'"
+       onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'">
+      Все новости в Google →
+    </a>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-copy">NASA JSC · DEEP SPACE NETWORK · ORION «INTEGRITY» · T-0: 1 АПР 2026, 22:35 UTC</div>
+      <div class="footer-legal">Данные рассчитаны по физической модели. Не является официальной телеметрией NASA.</div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-upd">Обновлено: <span id="last-upd">--</span></div>
+      <div class="flex items-center gap-2">
+        <div class="footer-upd">DSN</div>
+        <div class="dsn-bars">
+          <div class="dsn-bar" style="height:4px;animation:sigbar .7s ease-in-out infinite alternate;opacity:.5"></div>
+          <div class="dsn-bar" style="height:9px;animation:sigbar .9s ease-in-out infinite alternate;opacity:.5"></div>
+          <div class="dsn-bar" style="height:14px;animation:sigbar 1.1s ease-in-out infinite alternate;opacity:.5"></div>
+          <div class="dsn-bar" style="height:9px;animation:sigbar .8s ease-in-out infinite alternate;opacity:.5"></div>
+          <div class="dsn-bar" style="height:5px;animation:sigbar 1.3s ease-in-out infinite alternate;opacity:.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script>
+/* ═══════════════════════════════════════
+   STARS
+═══════════════════════════════════════ */
+(function(){
+  var sf=document.getElementById('sf');
+  for(var i=0;i<200;i++){
+    var el=document.createElement('div');el.className='star';
+    var sz=Math.random()*1.8;
+    el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;--o:'+(0.1+Math.random()*.9)+';--d:'+(2+Math.random()*7)+'s;animation-delay:'+(Math.random()*7)+'s';
+    sf.appendChild(el);
+  }
+})();
+
+/* ═══════════════════════════════════════
+   MISSION CONSTANTS
+═══════════════════════════════════════ */
+var LAUNCH_MS = Date.UTC(2026,3,1,22,35,0);
+var MH = 234;
+var EX=0.26,EY=0.52,MX=0.84,MY=0.38;
+
+var EVENTS = [
+  {h:27,   ms:LAUNCH_MS+27*3600000,   name:'МАНЁВР ТЛИ — КУРС НА ЛУНУ',      desc:'Двигатели разгоняют корабль до второй космической скорости. Курс — Луна!',                col:'#ffb830'},
+  {h:118,  ms:LAUNCH_MS+118*3600000,  name:'ПРОЛЁТ ЛУНЫ — 9 650 КМ',          desc:'Орион пройдёт мимо Луны. Гравитация автоматически развернёт корабль к Земле.',           col:'#c060ff'},
+  {h:233.5,ms:LAUNCH_MS+233.5*3600000,name:'ВХОД В АТМОСФЕРУ — 40 000 КМ/Ч', desc:'Теплозащитный щит испытает нагрев до 2 760°C. Радиомолчание на ~4 минуты.',            col:'#ff4020'},
+  {h:234,  ms:LAUNCH_MS+234*3600000,  name:'ПРИВОДНЕНИЕ В ТИХОМ ОКЕАНЕ',      desc:'Конец миссии! Экипаж подберёт корабль USS San Diego.',                                   col:'#39ff6a'},
+];
+
+function getMET(){return(Date.now()-LAUNCH_MS)/3600000;}
+function pad(n){return String(Math.floor(Math.abs(n))).padStart(2,'0');}
+function fmtMET(h){
+  var a=Math.abs(h)*3600,d=Math.floor(a/86400),
+      hh=Math.floor((a%86400)/3600),mm=Math.floor((a%3600)/60),ss=Math.floor(a%60);
+  return(h<0?'T− ':'T+ ')+(d>0?d+'д '+pad(hh)+':'+pad(mm)+':'+pad(ss):pad(hh)+':'+pad(mm)+':'+pad(ss));
+}
+function fmt(n){return Math.round(n).toLocaleString('ru-RU');}
+
+/* ═══════════════════════════════════════
+   PHYSICS MODEL
+═══════════════════════════════════════ */
+function getState(met){
+  var t=Math.max(0,met),dE,speed,gF=0.0001,phase,desc;
+  if(met<0){
+    phase='ДО СТАРТА';desc='Ракета SLS и корабль Орион на стартовом комплексе 39B. Экипаж занял места. Идёт финальный обратный отсчёт.';dE=6371;speed=0;gF=1;
+  } else if(t<0.13){
+    var f=t/0.13;dE=6371+f*120;speed=f*25000;gF=1+f*3.5;
+    phase='ПОДЪЁМ — SLS В РАБОТЕ';desc='Двигатели RS-25 и твердотопливные ускорители разгоняют ракету. Экипаж испытывает перегрузки до 4,5g. Через 2 минуты — сброс боковых ускорителей.';
+  } else if(t<0.35){
+    var f=(t-0.13)/0.22;dE=6371+120+f*250;speed=25000+f*3000;gF=f*0.4;
+    phase='MECO — РАЗДЕЛЕНИЕ СТУПЕНЕЙ';desc='Выключение маршевых двигателей (MECO). Разделение ступеней. Корабль следует по баллистической дуге, готовясь к выходу на орбиту.';
+  } else if(t<0.83){
+    var f=(t-0.35)/0.48;dE=6371+370+f*1600;speed=28000+f*200;gF=0.0001;
+    phase='ICPS — ПОДЪЁМ ОРБИТЫ';desc='Криогенная разгонная ступень ICPS поднимает орбиту. Экипаж в невесомости — начинается адаптация. Первые часы в космосе.';
+  } else if(t<5){
+    var f=(t-0.83)/4.17;dE=6371+1800+Math.sin(f*6)*2800;speed=28200;gF=0.0001;
+    phase='ИСПЫТАНИЯ СБЛИЖЕНИЯ';desc='Орион отрабатывает манёвры сближения с верхней ступенью ICPS — репетиция стыковки с лунным модулем для Артемиды III.';
+  } else if(t<24){
+    dE=6371+1800+Math.sin((t-5)/19*20)*2800;speed=28200;gF=0.0001;
+    phase='ВЫСОКАЯ ЗЕМНАЯ ОРБИТА';desc='Экипаж проверяет все системы Ориона: навигацию, жизнеобеспечение, связь. За иллюминатором — голубой диск Земли на фоне абсолютной черноты.';
+  } else if(t<27){
+    var f=(t-24)/3;dE=6371+2200+f*f*18000;speed=28000+f*f*10500;gF=(f>.4&&f<.9)?.25:0.0001;
+    phase='МАНЁВР ТЛИ — КУРС НА ЛУНУ 🔥';desc='Ступень ICPS включает двигатели почти на 20 минут (прирост скорости ≈ 900 м/с). Орион покидает земную орбиту и устремляется к Луне.';
+  } else if(t<118){
+    var f=(t-27)/91,mp=f>.9?Math.pow((f-.9)/.1,2)*8000:0;
+    speed=38500*Math.pow(1-f*.72,.7)+mp+800;
+    dE=24000+(352000-24000)*Math.pow(Math.sin(f*Math.PI*.5),1.2);gF=0.0001;
+    if(t<48){phase='ПЕРЕЛЁТ К ЛУНЕ — ДЕНЬ 1';desc='Орион летит по дуге к Луне. Земля уменьшается, Луна растёт. Первый «лунный восход» за иллюминатором.';}
+    else if(t<72){phase='ПЕРЕЛЁТ К ЛУНЕ — ДЕНЬ 2';desc='Четверть пути позади. Земля — синий диск размером с монету.';}
+    else if(t<96){phase='ПЕРЕЛЁТ К ЛУНЕ — ДЕНЬ 3';desc='Орион за серединой пути. Притяжение Луны начинает ускорять корабль.';}
+    else{phase='ПОДЛЁТ К ЛУНЕ';desc='Орион разгоняется гравитацией Луны. Лунная поверхность видна в деталях — кратеры, моря, горы.';}
+  } else if(t<145){
+    var f=(t-118)/27;
+    dE=f<.5?352000+(f/.5)*(400171-352000)*Math.sin(f*Math.PI):400171-((f-.5)/.5)*(400171-360000);
+    speed=3200+Math.exp(-Math.pow((f-.35)*4,2))*20000+2500;gF=0.0001;
+    if(f<.15){phase='ПОДХОД С ВИДИМОЙ СТОРОНЫ';desc='Орион на подлёте к Луне с видимой стороны. Экипаж видит лунные моря крупным планом.';}
+    else if(f<.40){phase='★ БЛИЖАЙШИЙ ПРОЛЁТ — 9 650 КМ';desc='ИСТОРИЧЕСКИЙ МОМЕНТ: первые люди у Луны за 53 года. Орион проносится в 9 650 км от поверхности.';}
+    else if(f<.62){phase='ОБРАТНАЯ СТОРОНА 🌙';desc='Луна полностью блокирует радиосигнал. Экипаж временно изолирован — корабль летит автономно ~20 минут.';}
+    else{phase='ГРАВИТАЦИОННЫЙ МАНЁВР';desc='Притяжение Луны без единого включения двигателей разворачивает Орион. Курс домой проложен.';}
+  } else if(t<MH){
+    var f=(t-145)/(MH-145),re=t>232?(t-232)/2:0;
+    dE=360000*Math.pow(1-Math.pow(f,.75),1)+6371;speed=2800+f*f*37000;gF=re>0?re*7.5:0.0001;
+    if(t<192){phase='ВОЗВРАЩЕНИЕ — ДЕНЬ 1–2';desc='Орион движется по дуге обратно. Голубой диск снова растёт. Экипаж проводит научные эксперименты.';}
+    else if(t<216){phase='ПРОВЕРКА РАДИАЦИОННОЙ ЗАЩИТЫ';desc='Пересечение поясов Ван Аллена — ключевое испытание перед длительными экспедициями.';}
+    else if(t<232){phase='ПОДГОТОВКА К ВХОДУ В АТМОСФЕРУ';desc='Служебный модуль отстыкован и сгорит. Капсула переходит в автономный режим.';}
+    else if(t<233.5){phase='🔥 ВХОД В АТМОСФЕРУ — 2 760°C';desc='Капсула входит на 40 000 км/ч. Плазма ненадолго блокирует связь. Теплозащитный экран принимает удар.';}
+    else{phase='ПРИВОДНЕНИЕ ✓';desc='Парашюты раскрыты. Орион снижается над Тихим океаном. USS San Diego ждёт экипаж.';}
+  } else {
+    phase='✓ МИССИЯ ЗАВЕРШЕНА';desc='Экипаж вернулся. Дорога к Артемиде III открыта.';dE=6371;speed=0;gF=1;
+  }
+  var moonBase=384400-Math.sin(t/240*Math.PI)*22000;
+  var dM=Math.abs(dE-moonBase);
+  if(t>=118&&t<=145){var ff=(t-118)/27,b=Math.exp(-Math.pow((ff-.35)*4,2));dM=Math.max(9650,9650+(200000-9650)*(1-b));}
+  var w=Math.sin(t*.4);
+  return{dE:Math.round(dE),dM:Math.round(dM),speed:Math.round(speed),gF:gF<.001?.0001:gF,phase:phase,desc:desc,
+    tH:Math.round(121+w*8),tC:Math.round(-157+Math.cos(t*.3)*12),tCa:Math.round(20+Math.sin(t*.1)*2.5),
+    tHeat:t>232&&t<234?Math.round((t-232)/2*1650):-25,
+    sig:Number(dE/299792.458).toFixed(3),prog:Math.min(100,t/MH*100).toFixed(1),td:Math.round(dE*1.35+t*200)};
+}
+
+/* ═══════════════════════════════════════
+   TRAJECTORY (Bezier)
+═══════════════════════════════════════ */
+function bez(p0,p1,p2,p3,t){
+  var m=1-t;
+  return{x:m*m*m*p0.x+3*m*m*t*p1.x+3*m*t*t*p2.x+t*t*t*p3.x,
+         y:m*m*m*p0.y+3*m*m*t*p1.y+3*m*t*t*p2.y+t*t*t*p3.y};
+}
+function traj(t){
+  t=Math.max(0,Math.min(t,MH));
+  if(t<0.5){var f=t/0.5;return{x:EX+0.035+f*.01,y:EY-0.032-f*.055};}
+  if(t<2){var f=(t-.5)/1.5,a=-Math.PI/2+f*Math.PI*.62;return{x:EX+Math.cos(a)*.072,y:EY+Math.sin(a)*.052};}
+  if(t<5){var f=(t-2)/3,a=-Math.PI/2+Math.PI*.62+f*Math.PI*.75;return{x:EX+Math.cos(a)*.092,y:EY+Math.sin(a)*.062};}
+  if(t<24){var f=(t-5)/19,a=-Math.PI/2+Math.PI*1.37+f*Math.PI*2.15;return{x:EX+Math.cos(a)*.115,y:EY+Math.sin(a)*.078};}
+  if(t<27){var f=(t-24)/3,base=-Math.PI/2+Math.PI*1.37+Math.PI*2.15,a=base+f*.75,r=.115+f*.075;return{x:EX+Math.cos(a)*r,y:EY+Math.sin(a)*r*.70};}
+  if(t<118){var f=(t-27)/91;return bez({x:EX+.14,y:EY-.10},{x:EX+.20,y:EY-.30},{x:EX+.44,y:EY-.26},{x:MX+.04,y:MY-.08},f);}
+  if(t<135){var f=(t-118)/17;return bez({x:MX+.04,y:MY-.08},{x:MX+.13,y:MY+.02},{x:MX+.09,y:MY+.13},{x:MX-.06,y:MY+.10},f);}
+  if(t<145){var f=(t-135)/10;return bez({x:MX-.06,y:MY+.10},{x:MX-.11,y:MY+.19},{x:MX-.21,y:MY+.22},{x:MX-.30,y:MY+.20},f);}
+  var f=(t-145)/(MH-145);
+  return bez({x:MX-.30,y:MY+.20},{x:EX+.36,y:EY+.36},{x:EX+.17,y:EY+.27},{x:EX+.032,y:EY+.048},f);
+}
+
+/* ═══════════════════════════════════════
+   CANVAS
+═══════════════════════════════════════ */
+var cv=document.getElementById('cv');
+var ctx=cv.getContext('2d');
+var CW=0,CH=0,PP=[],CSTARS=[];
+var EX_PARTICLES=[];
+function initExhaust(){
+  EX_PARTICLES=[];
+  for(var i=0;i<30;i++){EX_PARTICLES.push({offset:Math.random(),spread:(Math.random()-.5)*2,sz:0.2+Math.random()*.6,warm:Math.random()<.65});}
+}
+initExhaust();
+function precompute(){PP=[];for(var t=0;t<=MH;t+=0.28){PP.push({t:t,p:traj(t)});}}
+function genStars(){
+  CSTARS=[];
+  for(var i=0;i<200;i++){CSTARS.push({x:Math.random(),y:Math.random(),r:Math.random()*1.3,o:.1+Math.random()*.9,d:2+Math.random()*8,ph:Math.random()*Math.PI*2});}
+}
+function resize(){
+  var wrap=document.getElementById('cvwrap');
+  CW=wrap.clientWidth;CH=cv.clientHeight;cv.width=CW;cv.height=CH;
+  genStars();precompute();
+}
+window.addEventListener('resize',function(){resize();});
+function wx(nx){return nx*CW;}
+function wy(ny){return ny*CH;}
+function drawPlanet(x,y,r,c1,c2,gc){
+  var g=ctx.createRadialGradient(x,y,r*.5,x,y,r*2.8);
+  g.addColorStop(0,gc.replace(')',',0.3)').replace('rgb','rgba'));
+  g.addColorStop(1,gc.replace(')',',0)').replace('rgb','rgba'));
+  ctx.beginPath();ctx.arc(x,y,r*2.8,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  var b=ctx.createRadialGradient(x-r*.32,y-r*.32,0,x,y,r);
+  b.addColorStop(0,c1);b.addColorStop(1,c2);
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=b;ctx.fill();
+  var h=ctx.createRadialGradient(x-r*.26,y-r*.28,0,x-r*.26,y-r*.28,r*.5);
+  h.addColorStop(0,'rgba(255,255,255,0.2)');h.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=h;ctx.fill();
+}
+function drawOrionShip(ox,oy,met,ts){
+  var dt=met<1?0.08:2.0;
+  var np=traj(Math.min(met+dt,MH));
+  var ddx=wx(np.x)-ox,ddy=wy(np.y)-oy;
+  var dl=Math.sqrt(ddx*ddx+ddy*ddy);
+  var angle=dl>0.5?Math.atan2(ddy,ddx):Math.atan2(-1,0.1);
+  var burning=(met>=0&&met<0.15)||(met>=24&&met<27.3);
+  var sz=Math.max(8,Math.min(CW,CH)*0.028);
+  ctx.save();ctx.translate(ox,oy);ctx.rotate(angle);
+  var grd=ctx.createRadialGradient(0,0,0,0,0,sz*5.5);
+  grd.addColorStop(0,'rgba(0,200,255,0.28)');grd.addColorStop(0.5,'rgba(0,150,255,0.08)');grd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.arc(0,0,sz*5.5,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+  if(burning){
+    EX_PARTICLES.forEach(function(p){
+      var phase=((ts/100+p.offset)%1);
+      var dist=sz*(0.6+phase*3.8),spr=p.spread*sz*0.6,alpha=(1-phase)*0.85;
+      var col=p.warm?'rgba(255,'+(60+Math.floor(phase*130))+',0,'+alpha+')':'rgba(255,220,60,'+alpha+')';
+      ctx.beginPath();ctx.arc(-sz*0.55-dist,spr,sz*p.sz*(1-phase*0.65),0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    });
+  }
+  ctx.shadowColor='rgba(0,200,255,0.75)';ctx.shadowBlur=10;
+  ctx.fillStyle='#5a6a7a';ctx.beginPath();ctx.rect(-sz*1.25,-sz*0.44,sz*0.98,sz*0.88);ctx.fill();
+  ctx.shadowBlur=0;
+  var panels=[[-sz*1.1,-sz*1.08,sz*0.62,sz*0.52],[-sz*1.1,sz*0.56,sz*0.62,sz*0.52]];
+  panels.forEach(function(p){
+    ctx.fillStyle='#0d1f48';ctx.fillRect(p[0],p[1],p[2],p[3]);
+    var sg=ctx.createLinearGradient(p[0],p[1],p[0]+p[2],p[1]+p[3]);
+    sg.addColorStop(0,'rgba(20,80,200,0.25)');sg.addColorStop(1,'rgba(0,120,255,0.1)');
+    ctx.fillStyle=sg;ctx.fillRect(p[0],p[1],p[2],p[3]);
+    ctx.strokeStyle='rgba(40,120,255,0.35)';ctx.lineWidth=0.6;
+    for(var li=1;li<4;li++){ctx.beginPath();ctx.moveTo(p[0]+p[2]*li/4,p[1]);ctx.lineTo(p[0]+p[2]*li/4,p[1]+p[3]);ctx.stroke();}
+  });
+  ctx.shadowColor='rgba(255,255,255,0.6)';ctx.shadowBlur=9;
+  ctx.beginPath();ctx.moveTo(sz*0.30,0);ctx.lineTo(-sz*0.10,-sz*0.54);ctx.lineTo(-sz*0.22,-sz*0.44);
+  ctx.lineTo(-sz*1.25,-sz*0.44);ctx.lineTo(-sz*1.25,sz*0.44);ctx.lineTo(-sz*0.22,sz*0.44);ctx.lineTo(-sz*0.10,sz*0.54);ctx.closePath();
+  var cg=ctx.createLinearGradient(-sz*1.25,0,sz*0.30,0);
+  cg.addColorStop(0,'#9ab0c8');cg.addColorStop(0.45,'#e8f2fa');cg.addColorStop(1,'#b0c4d8');
+  ctx.fillStyle=cg;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.beginPath();ctx.arc(-sz*0.52,0,sz*0.19,0,Math.PI*2);ctx.fillStyle='#001422';ctx.fill();
+  ctx.beginPath();ctx.arc(-sz*0.52,0,sz*0.19,0,Math.PI*2);
+  var wg=ctx.createRadialGradient(-sz*0.52,0,0,-sz*0.52,0,sz*0.19);
+  wg.addColorStop(0,'rgba(80,190,255,0.55)');wg.addColorStop(1,'rgba(0,80,180,0.2)');
+  ctx.fillStyle=wg;ctx.fill();
+  ctx.beginPath();ctx.arc(-sz*0.57,-sz*0.06,sz*0.07,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill();
+  ctx.restore();
+  var lx=ox+sz*3.5+6,ly=oy;
+  if(lx+130>CW){lx=ox-sz*3.5-135;}
+  var ldir=lx>ox?1:-1;
+  ctx.save();
+  ctx.shadowColor='rgba(0,200,255,0.6)';ctx.shadowBlur=8;
+  ctx.strokeStyle='rgba(0,200,255,0.55)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(ox+ldir*sz*0.8,oy);ctx.lineTo(lx-(ldir>0?6:0),ly);
+  ctx.stroke();ctx.setLineDash([]);
+  ctx.shadowBlur=0;ctx.fillStyle='rgba(0,200,255,0.92)';
+  ctx.font='bold 9px "Share Tech Mono",monospace';
+  ctx.textAlign=ldir>0?'left':'right';ctx.fillText('ОРИОН · СЕЙЧАС',lx,ly-3);
+  ctx.restore();
+}
+var lastRender=0;
+function renderCanvas(ts){
+  requestAnimationFrame(renderCanvas);
+  if(ts-lastRender<33)return;lastRender=ts;
+  if(!CW||!CH)return;
+  ctx.clearRect(0,0,CW,CH);
+  var bg=ctx.createLinearGradient(0,0,0,CH);
+  bg.addColorStop(0,'#010306');bg.addColorStop(1,'#020408');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,CW,CH);
+  CSTARS.forEach(function(s){
+    var a=s.o*(.4+.6*Math.sin(ts/1000/s.d+s.ph));
+    ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(s.x*CW,s.y*CH,s.r,0,Math.PI*2);ctx.fill();
+  });
+  var met=getMET();var curMET=Math.max(0,Math.min(met,MH));
+  ctx.save();ctx.setLineDash([3,6]);ctx.lineWidth=1;ctx.strokeStyle='rgba(0,80,160,0.28)';ctx.shadowBlur=0;
+  ctx.beginPath();var started=false;
+  PP.forEach(function(pt){
+    if(pt.t<curMET)return;
+    var x=wx(pt.p.x),y=wy(pt.p.y);
+    if(!started){ctx.moveTo(x,y);started=true;}else{ctx.lineTo(x,y);}
+  });
+  ctx.stroke();ctx.restore();
+  if(met>0){
+    ctx.save();ctx.shadowColor='rgba(0,200,255,0.6)';ctx.shadowBlur=8;
+    ctx.lineWidth=2.5;ctx.strokeStyle='rgba(0,200,255,0.88)';
+    ctx.beginPath();var s2=false;
+    PP.forEach(function(pt){
+      if(pt.t>curMET)return;
+      var x=wx(pt.p.x),y=wy(pt.p.y);
+      if(!s2){ctx.moveTo(x,y);s2=true;}else{ctx.lineTo(x,y);}
+    });
+    ctx.stroke();ctx.restore();
+  }
+  var mxc=wx(MX),myc=wy(MY),mr=Math.min(CW,CH)*.036;
+  var flybyR=mr*2.2;
+  ctx.save();ctx.setLineDash([4,5]);ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(192,96,255,0.35)';ctx.shadowColor='rgba(192,96,255,0.3)';ctx.shadowBlur=6;
+  ctx.beginPath();ctx.arc(mxc,myc,flybyR,0,Math.PI*2);ctx.stroke();ctx.restore();
+  var nearMoon=(met>=112&&met<=150);
+  ctx.fillStyle=nearMoon?'rgba(192,96,255,0.75)':'rgba(192,96,255,0.35)';
+  ctx.font=(nearMoon?'bold 8px':'7px')+' "Share Tech Mono",monospace';
+  ctx.textAlign='center';ctx.fillText('9 650 КМ',mxc,myc-flybyR-4);
+  var milestones=[{t:27,lbl:'ТЛИ',col:'#ffb830'},{t:118,lbl:'ОБЛЁТ',col:'#c060ff'},{t:145,lbl:'ДОМОЙ',col:'#39ff6a'}];
+  milestones.forEach(function(m){
+    var pt=traj(m.t),mpx=wx(pt.x),mpy=wy(pt.y);
+    ctx.save();ctx.shadowColor=m.col;ctx.shadowBlur=8;
+    ctx.beginPath();ctx.arc(mpx,mpy,4,0,Math.PI*2);ctx.fillStyle=m.col;ctx.fill();ctx.restore();
+    ctx.fillStyle=m.col;ctx.font='bold 9px "Share Tech Mono",monospace';ctx.textAlign='center';ctx.fillText(m.lbl,mpx,mpy-9);
+  });
+  var ex=wx(EX),ey=wy(EY),er=Math.min(CW,CH)*.055;
+  drawPlanet(ex,ey,er,'#4a90e2','#0a2060','rgb(30,80,200)');
+  ctx.save();var atm=ctx.createRadialGradient(ex,ey,er,ex,ey,er*1.35);
+  atm.addColorStop(0,'rgba(80,160,255,0.15)');atm.addColorStop(1,'rgba(0,80,255,0)');
+  ctx.beginPath();ctx.arc(ex,ey,er*1.35,0,Math.PI*2);ctx.fillStyle=atm;ctx.fill();ctx.restore();
+  ctx.fillStyle='rgba(200,230,255,0.85)';ctx.font='bold '+(er*.65)+'px "Orbitron",monospace';
+  ctx.textAlign='center';ctx.shadowBlur=0;ctx.fillText('ЗЕМЛЯ',ex,ey+er*2.4);
+  drawPlanet(mxc,myc,mr,'#c8c8c0','#282828','rgb(160,155,140)');
+  ctx.fillStyle='rgba(200,200,180,0.85)';ctx.font='bold '+(mr*.8)+'px "Orbitron",monospace';
+  ctx.textAlign='center';ctx.fillText('ЛУНА',mxc,myc+mr*2.6);
+  if(met>=-0.5&&met<=MH){
+    var cp=traj(Math.max(0,Math.min(met,MH)));
+    var ox=wx(cp.x),oy=wy(cp.y);
+    var trailLen=20;
+    for(var i=1;i<=trailLen;i++){
+      var tm=met-i*0.4;if(tm<0)break;
+      var tp=traj(Math.max(0,tm));
+      var frac=1-i/trailLen,tr=Math.max(0.5,2.8*frac);
+      ctx.beginPath();ctx.arc(wx(tp.x),wy(tp.y),tr,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,200,255,'+(0.65*frac)+')';ctx.fill();
+    }
+    var pulse=(Math.sin(ts/380)+1)/2;
+    ctx.beginPath();ctx.arc(ox,oy,11+pulse*8,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,200,255,'+(0.5-pulse*.35)+')';ctx.lineWidth=1.5;ctx.stroke();
+    drawOrionShip(ox,oy,met,ts);
+  }
+  ctx.fillStyle='rgba(0,200,255,0.38)';ctx.font='10px "Orbitron",monospace';
+  ctx.textAlign='left';ctx.fillText('АРТЕМИДА II  ·  КАРТА ПОЛЁТА В РЕАЛЬНОМ ВРЕМЕНИ',12,18);
+  ctx.fillStyle='rgba(0,200,255,.5)';ctx.fillRect(12,CH-22,20,2);
+  ctx.fillStyle='rgba(0,200,255,.45)';ctx.font='8px "Share Tech Mono",monospace';
+  ctx.fillText('пройдено',36,CH-17);
+  ctx.strokeStyle='rgba(0,80,160,.45)';ctx.lineWidth=1;ctx.setLineDash([3,5]);
+  ctx.beginPath();ctx.moveTo(108,CH-21);ctx.lineTo(128,CH-21);ctx.stroke();
+  ctx.setLineDash([]);ctx.fillText('маршрут',132,CH-17);
+}
+
+/* ── Canvas hover tooltip ── */
+(function(){
+  var tip=document.getElementById('cv-tooltip');
+  cv.addEventListener('mousemove',function(e){
+    var rect=cv.getBoundingClientRect();
+    var mx=(e.clientX-rect.left)/rect.width,my=(e.clientY-rect.top)/rect.height;
+    var met=getMET(),cp=traj(Math.max(0,Math.min(met,MH)));
+    var dx=mx-cp.x,dy=my-cp.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<0.07){
+      var s=getState(met);
+      tip.style.left=(e.clientX-rect.left+10)+'px';tip.style.top=(e.clientY-rect.top-10)+'px';
+      tip.innerHTML='<b style="color:#fff">ОРИОН</b><br>⚡ '+fmt(s.speed)+' км/ч<br>🌍 '+fmt(s.dE)+' км от Земли<br>🌙 '+fmt(s.dM)+' км до Луны<br>📡 задержка '+s.sig+' с';
+      tip.style.display='block';
+    } else {tip.style.display='none';}
+  });
+  cv.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+
+/* ═══════════════════════════════════════
+   UI UPDATE
+═══════════════════════════════════════ */
+function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+function setBar(id,p){var e=document.getElementById(id);if(e)e.style.width=p+'%';}
+
+function updateUI(){
+  var met=getMET();var s=getState(met);
+  setEl('h-met',fmtMET(met));
+  setEl('last-upd',new Date().toLocaleTimeString('ru-RU'));
+  setEl('v-speed',fmt(s.speed));setEl('v-de',fmt(s.dE));setEl('v-dm',fmt(s.dM));
+  setEl('v-prog',parseFloat(s.prog).toFixed(1));
+  setBar('b-speed',Math.min(100,s.speed/40000*100));
+  setBar('b-de',Math.min(100,s.dE/400171*100));
+  setBar('b-dm',Math.min(100,Math.max(0,100-s.dM/384400*100)));
+  setBar('b-prog',parseFloat(s.prog));
+  var pe=document.getElementById('v-phase');if(pe)pe.textContent=s.phase;
+  setEl('v-phasedesc',s.desc);
+  setEl('v-g',s.gF<0.001?'НЕВЕСОМОСТЬ':s.gF.toFixed(2)+' g');
+  setEl('v-sig',s.sig+' с');setEl('v-tca','+'+s.tCa+' °C');setEl('v-td',fmt(s.td)+' км');
+  setEl('fl-sig',s.sig);setEl('fl-laps',Math.round(s.dE/40075));
+  setEl('fl-days',(s.dE/120/24/365.25).toFixed(1));
+  setEl('fl-temp',s.tHeat>0?'+'+s.tHeat+' °C (щит раскалён!)':'солн. +'+s.tH+'°C  /  тень '+s.tC+'°C');
+  updateCountdown(met);updatePhaseNav(met);updateEventBanner(met);
+}
+
+/* ── Countdown ── */
+function updateCountdown(met){
+  var now=Date.now(),next=null;
+  for(var i=0;i<EVENTS.length;i++){if(EVENTS[i].ms>now){next=EVENTS[i];break;}}
+  var nameEl=document.getElementById('next-event-name');
+  var descEl=document.getElementById('next-event-desc');
+  var wrap=document.getElementById('cd-wrap');
+  if(next){
+    var diff=next.ms-now;
+    if(nameEl){nameEl.textContent=next.name;nameEl.style.color=next.col;}
+    if(descEl)descEl.textContent=next.desc;
+    var tot=Math.floor(diff/1000),mm=Math.floor(tot/60),hh=Math.floor(mm/60),dd=Math.floor(hh/24);
+    setEl('cd-d',pad(dd));setEl('cd-h',pad(hh%24));setEl('cd-m',pad(mm%60));setEl('cd-s',pad(tot%60));
+  } else if(met>=MH){
+    if(nameEl)nameEl.textContent='МИССИЯ ЗАВЕРШЕНА ✓';
+    if(wrap)wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;font-family:Orbitron,monospace;font-size:14px;color:var(--green);letter-spacing:2px">✓ ЭКИПАЖ ДОМА</div>';
+    if(descEl)descEl.textContent='Все этапы миссии успешно выполнены.';
+  } else {
+    if(nameEl)nameEl.textContent='ВСЕ СОБЫТИЯ ВЫПОЛНЕНЫ';
+    if(wrap)wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;font-family:Share Tech Mono,monospace;font-size:9px;color:var(--green)">✓ ФИНАЛЬНЫЙ ЭТАП</div>';
+  }
+}
+
+/* ── Event banner ── */
+function updateEventBanner(met){
+  var banner=document.getElementById('event-banner'),bannerText=document.getElementById('event-banner-text');
+  if(!banner)return;
+  var flybyH=118,diff=flybyH-met;
+  if(diff>0&&diff<6){
+    banner.style.display='flex';
+    bannerText.innerHTML='🌙  <strong>ЧЕРЕЗ '+Math.round(diff*60)+' МИН</strong> — ОРИОН ПРОЙДЁТ В 9 650 КМ ОТ ЛУНЫ!  Первые люди у Луны за 53 года';
+    bannerText.style.color='#c060ff';
+  } else if(diff<=0&&diff>-8){
+    banner.style.display='flex';
+    bannerText.innerHTML='🌙  <strong>ПРЯМО СЕЙЧАС</strong> — ИСТОРИЧЕСКИЙ ПРОЛЁТ ЛУНЫ! Орион в 9 650 км от поверхности';
+    bannerText.style.color='#ff80ff';
+  } else if(diff<=-8&&diff>-27){
+    banner.style.display='flex';
+    bannerText.innerHTML='🌙  ПРОЛЁТ ЛУНЫ ЗАВЕРШЁН ✓ · Гравитационный манёвр выполнен · Курс на Землю проложен';
+    bannerText.style.color='rgba(57,255,106,0.85)';
+  } else {banner.style.display='none';}
+}
+
+/* ═══════════════════════════════════════
+   PHASE NAVIGATOR
+═══════════════════════════════════════ */
+var PHASES=[
+  {h:0,    icon:'🚀', name:'Старт\nSLS',       desc:'Ракета SLS стартует со стартового комплекса 39B в КЦК. Подъём занимает около 8 минут до выхода на орбиту.'},
+  {h:0.83, icon:'🌍', name:'Земная\nорбита',   desc:'Орион выходит на орбиту ~1 800 км над Землёй. Экипаж проверяет все системы корабля в течение первых суток.'},
+  {h:27,   icon:'🔥', name:'Манёвр\nТЛИ',      desc:'Включение двигателей ~20 минут разгоняет корабль до второй космической скорости и направляет к Луне.'},
+  {h:48,   icon:'→',  name:'Перелёт\nк Луне',  desc:'3–4 суток Орион летит к Луне, постепенно замедляясь, затем ускоряясь под влиянием лунного притяжения.'},
+  {h:118,  icon:'🌙', name:'Пролёт\nЛуны ★',   desc:'Орион проходит в 9 650 км от поверхности Луны. Лунная гравитация разворачивает корабль к Земле — без топлива!'},
+  {h:145,  icon:'←',  name:'Возврат\nк Земле', desc:'Орион летит обратно к Земле. Голубой диск постепенно растёт. Экипаж проводит финальные эксперименты.'},
+  {h:232,  icon:'⚡', name:'Вход в\nатмосферу',desc:'Корабль входит на скорости 40 000 км/ч. Теплозащитный щит выдерживает нагрев до 2 760°C.'},
+  {h:234,  icon:'🏁', name:'Приводне-\nние',     desc:'Парашюты раскрываются, капсула приводняется в Тихом океане. Корабль USS San Diego подбирает экипаж.'},
+];
+function updatePhaseNav(met){
+  var nav=document.getElementById('phase-nav');if(!nav)return;
+  var curIdx=0;for(var i=0;i<PHASES.length;i++){if(met>=PHASES[i].h)curIdx=i;}
+  nav.innerHTML=PHASES.map(function(p,i){
+    var cls=met>=p.h+.05?'pn-done':met>=p.h-.1?'pn-active':'pn-up';
+    var statusTxt=cls==='pn-done'?'✓ ГОТОВО':cls==='pn-active'?'● СЕЙЧАС':'';
+    return '<div class="pn-item '+cls+'" onclick="showPhaseDetail('+i+')">'
+      +'<div class="pn-dot"></div><div class="pn-icon">'+p.icon+'</div>'
+      +'<div class="pn-name">'+p.name.replace('\n','<br>')+'</div>'
+      +'<div class="pn-status">'+statusTxt+'</div></div>';
+  }).join('');
+  var activeEl=nav.querySelector('.pn-active');
+  if(activeEl)activeEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  showPhaseDetail(curIdx);
+}
+function showPhaseDetail(idx){
+  var p=PHASES[idx];var met=getMET();
+  var cls=met>=p.h+.05?'done':met>=p.h-.1?'active':'upcoming';
+  var nameEl=document.getElementById('phase-detail-name');
+  var descEl=document.getElementById('phase-detail-desc');
+  var iconEl=document.getElementById('phase-detail-icon');
+  if(nameEl)nameEl.textContent=p.name.replace('\n',' ');
+  if(descEl)descEl.textContent=p.desc;
+  if(iconEl)iconEl.textContent=p.icon;
+  var box=document.getElementById('phase-detail-box');
+  if(box){
+    if(cls==='active'){box.style.borderColor='rgba(0,200,255,.4)';box.style.background='rgba(0,200,255,.06)';}
+    else if(cls==='done'){box.style.borderColor='rgba(57,255,106,.25)';box.style.background='rgba(57,255,106,.03)';}
+    else{box.style.borderColor='rgba(0,200,255,.1)';box.style.background='rgba(0,200,255,.02)';}
+  }
+}
+
+/* ═══════════════════════════════════════
+   CREW
+═══════════════════════════════════════ */
+var CREW=[
+  {i:'RW',n:'Рид Уайзман',    r:'Командир',        f:'🇺🇸',note:'NASA · 1 полёт на МКС'},
+  {i:'VG',n:'Виктор Гловер',  r:'Пилот',           f:'🇺🇸',note:'NASA · МКС Экспедиция 64'},
+  {i:'CK',n:'Кристина Кох',   r:'Спец. по миссии', f:'🇺🇸',note:'NASA · рекорд: 328 дней'},
+  {i:'JH',n:'Джереми Хансен', r:'Спец. по миссии', f:'🇨🇦',note:'ККА · первый полёт в космос'},
+];
+function buildCrew(){
+  document.getElementById('crew-grid').innerHTML=CREW.map(function(c){
+    return '<div class="crew-card">'
+      +'<div class="crew-avatar">'+c.i+'</div>'
+      +'<div class="crew-name">'+c.n+'</div>'
+      +'<div class="crew-role">'+c.r+'</div>'
+      +'<div style="font-size:14px;margin-top:4px">'+c.f+'</div>'
+      +'<div class="crew-note">'+c.note+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   KEY FACTS
+═══════════════════════════════════════ */
+function buildKeyFacts(){
+  var facts=[
+    ['🏁','Тип','Испытательный полёт с экипажем (без посадки на Луну)'],
+    ['📅','Длительность','~234 часа (~9,75 суток)'],
+    ['🚀','Ракета','SLS Block I — мощнейшая ракета в истории NASA'],
+    ['🛸','Корабль','Orion MPCV, теплозащитный щит диаметром 5 м'],
+    ['📍','Приводнение','Тихий океан, корабль USS San Diego'],
+    ['🎯','Итог','Открывает путь к посадке на Луну в Артемиде III'],
+  ];
+  document.getElementById('keyfacts').innerHTML=facts.map(function(f){
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(0,180,255,.07)">'
+      +'<span style="font-size:16px;flex-shrink:0;margin-top:1px">'+f[0]+'</span>'
+      +'<div><div class="mono" style="font-size:7px;color:var(--sub);letter-spacing:1px">'+f[1]+'</div>'
+      +'<div style="font-size:13px;color:var(--txt);font-weight:500;margin-top:2px">'+f[2]+'</div></div></div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   SYSTEMS
+═══════════════════════════════════════ */
+function buildSystems(){
+  var sys=[
+    {n:'Двигательная установка',ok:true},
+    {n:'Жизнеобеспечение (O₂/CO₂)',ok:true},
+    {n:'Навигация и управление (GNC)',ok:true},
+    {n:'Deep Space Network (DSN)',ok:true},
+    {n:'Теплозащитный экран',ok:true},
+    {n:'Связь Ku/S-диапазон',ok:true},
+  ];
+  document.getElementById('syslist').innerHTML=sys.map(function(s){
+    var color=s.ok?'var(--green)':'var(--amber)';
+    var status=s.ok?'НОРМ':'ВНИМАНИЕ';
+    return '<div class="sys-row">'
+      +'<div style="width:6px;height:6px;border-radius:50%;background:'+color+';box-shadow:0 0 5px '+color+';flex-shrink:0"></div>'
+      +'<div class="mono flex-1" style="font-size:8px;color:var(--sub)">'+s.n+'</div>'
+      +'<div class="mono" style="font-size:7px;color:'+color+'">'+status+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════ */
+var TL=[
+  {h:0,    n:'Старт SLS 🚀',              d:'КЦ Кеннеди, стартовый комплекс 39B'},
+  {h:0.13, n:'MECO — разделение ступеней', d:'Выход на баллистическую траекторию'},
+  {h:0.83, n:'Выход на орбиту',            d:'Начало проверки всех систем Ориона'},
+  {h:5,    n:'Испытания сближения',         d:'Репетиция манёвров стыковки'},
+  {h:24,   n:'Орбитальная проверка',        d:'Навигация и жизнеобеспечение'},
+  {h:27,   n:'Манёвр ТЛИ 🔥',              d:'Включение двигателей — курс на Луну'},
+  {h:48,   n:'Перелёт — день 1',            d:'Первые фото Земли с большого расстояния'},
+  {h:72,   n:'Перелёт — день 2',            d:'Земля размером с монету'},
+  {h:96,   n:'Перелёт — день 3',            d:'Луна занимает пол-иллюминатора'},
+  {h:118,  n:'★ Ближайший пролёт Луны',    d:'9 650 км от поверхности'},
+  {h:132,  n:'Обратная сторона 🌙',         d:'~20 мин радиомолчание'},
+  {h:145,  n:'Гравитационный манёвр',       d:'Начало возвращения к Земле'},
+  {h:192,  n:'На полпути домой',            d:'Земля снова растёт'},
+  {h:216,  n:'Проверка радиационной защиты',d:'Пересечение поясов Ван Аллена'},
+  {h:232,  n:'Подготовка к входу',          d:'Отстыковка служебного модуля'},
+  {h:233.5,n:'Вход в атмосферу 🔥',         d:'2 760°C, 40 000 км/ч'},
+  {h:234,  n:'Приводнение ✓',               d:'Тихий океан — завершение миссии'},
+];
+function buildTimeline(){
+  var met=getMET();
+  document.getElementById('timeline').innerHTML=TL.map(function(m){
+    var cls=met>=m.h+.05?'done':met>=m.h-.1?'active':'up';
+    var diff=m.h-met;
+    var ts='';
+    if(cls==='done')
+      ts='<div class="mono" style="font-size:7px;color:var(--green);margin-top:2px">✓ выполнено</div>';
+    else if(cls==='active')
+      ts='<div class="mono" style="font-size:7px;color:var(--cyan);margin-top:2px;animation:blink 1.4s infinite">● ИДЁТ СЕЙЧАС</div>';
+    else
+      ts='<div class="mono" style="font-size:7px;color:var(--amber);margin-top:2px">через '+(diff>24?Math.floor(diff/24)+'д '+Math.floor(diff%24)+'ч':Math.floor(diff)+'ч '+pad((diff%1)*60)+'м')+'</div>';
+    return '<div class="tl-item '+cls+'"><div class="tl-dot"></div><div>'
+      +'<div class="orb" style="font-size:9px;font-weight:600;color:var(--txt)">'+m.n+'</div>'
+      +'<div class="mono" style="font-size:7px;color:var(--sub);margin-top:1px">'+m.d+'</div>'
+      +ts+'</div></div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   YOUTUBE — click-to-load
+═══════════════════════════════════════ */
+function loadYT(wrapId,videoId,mode){
+  var wrap=document.getElementById(wrapId);
+  if(!wrap)return;
+  var src;
+  if(mode==='live'){
+    src='https://www.youtube.com/embed/live_stream?channel='+videoId+'&autoplay=1&rel=0&modestbranding=1';
+  } else {
+    src='https://www.youtube.com/embed/'+videoId+'?autoplay=1&rel=0&modestbranding=1';
+  }
+  wrap.innerHTML='<iframe src="'+src+'" style="position:absolute;inset:0;width:100%;height:100%;border:none" '
+    +'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" '
+    +'allowfullscreen></iframe>';
+}
+
+/* ═══════════════════════════════════════
+   NEWS — Google RSS via proxy
+═══════════════════════════════════════ */
+var NASA_BLOG = 'https://www.nasa.gov/blogs/artemis/';
+
+function loadNews(){
+  var grid=document.getElementById('news-grid');
+  if(!grid)return;
+  grid.innerHTML='<div class="news-outer-grid"><div class="news-loading"><div style="animation:blink 1.4s infinite;display:inline-block;margin-right:8px">⟳</div> Загружаем новости...</div></div>';
+
+  var queries=[
+    'https://news.google.com/rss/search?q=Artemis+II+NASA+Orion&hl=ru&gl=RU&ceid=RU:ru',
+    'https://news.google.com/rss/search?q=Artemis+2+NASA+moon+2026&hl=en&gl=US&ceid=US:en'
+  ];
+  var proxies=[
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url=',
+    'https://api.codetabs.com/v1/proxy/?quest='
+  ];
+  var allItems=[],pending=queries.length;
+  var timedOut=false;
+
+  var timeout=setTimeout(function(){
+    if(pending>0){timedOut=true;pending=0;renderNews(grid,allItems);}
+  },9000);
+
+  queries.forEach(function(rssUrl,qi){
+    var proxy=proxies[qi%proxies.length]+encodeURIComponent(rssUrl);
+    fetch(proxy,{cache:'no-cache'})
+      .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+      .then(function(xml){
+        if(timedOut)return;
+        try{
+          var parser=new DOMParser();
+          var doc=parser.parseFromString(xml,'application/xml');
+          var items=doc.querySelectorAll('item');
+          items.forEach(function(item){
+            var title=(item.querySelector('title')||{}).textContent||'';
+            var link=(item.querySelector('link')||{}).textContent||'';
+            var pubDate=(item.querySelector('pubDate')||{}).textContent||'';
+            var source=(item.querySelector('source')||{}).textContent||'';
+            if(title&&!allItems.find(function(x){return x.title===title;})){
+              allItems.push({title:title,link:link,pubDate:pubDate,source:source});
+            }
+          });
+        }catch(e){}
+        pending--;
+        if(pending<=0){clearTimeout(timeout);renderNews(grid,allItems);}
+      })
+      .catch(function(){
+        pending--;
+        if(pending<=0&&!timedOut){clearTimeout(timeout);renderNews(grid,allItems);}
+      });
+  });
+}
+
+function renderNews(grid,items){
+  if(!items||!items.length){staticFallbackNews(grid);return;}
+  items.sort(function(a,b){return new Date(b.pubDate)-new Date(a.pubDate);});
+  var shown=items.slice(0,6);
+  var html='<div class="news-outer-grid">';
+  shown.forEach(function(item,i){
+    var dateStr='';
+    try{var d=new Date(item.pubDate);if(!isNaN(d))dateStr=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});}catch(e){}
+    var title=item.title.replace(/^.+? - /,'').trim()||item.title;
+    var src=item.source||'Новости';
+    var lnk=item.link||NASA_BLOG;
+    html+='<a class="news-card" href="'+escHtml(lnk)+'" target="_blank" rel="noopener" style="animation-delay:'+(i*60)+'ms">'
+      +'<div class="news-src-badge">'+escHtml(src)+'</div>'
+      +'<div class="news-title">'+escHtml(title)+'</div>'
+      +'<div class="news-meta">'
+      +(dateStr?'<span class="news-date">'+dateStr+'</span>':'<span></span>')
+      +'<span class="news-read">Читать →</span>'
+      +'</div></a>';
+  });
+  html+='</div>';
+  grid.innerHTML=html;
+}
+
+function staticFallbackNews(grid){
+  var statics=[
+    {src:'NASA Blog',   title:'Все новости о миссии Артемида II — официальный блог',          link:NASA_BLOG},
+    {src:'NASA Blog',   title:'Знакомьтесь с экипажем Артемиды II: Уайзман, Гловер, Кох, Хансен', link:NASA_BLOG},
+    {src:'NASA Blog',   title:'Корабль Orion: технические характеристики и цели миссии',         link:NASA_BLOG},
+    {src:'NASA Blog',   title:'Ракета SLS Block I — мощнейшая в истории агентства',              link:NASA_BLOG},
+    {src:'NASA Blog',   title:'Deep Space Network: как NASA держит связь на 400 000 км',          link:NASA_BLOG},
+    {src:'NASA Blog',   title:'Артемида II vs Аполлон-8: в чём сходство и отличие миссий',       link:NASA_BLOG},
+  ];
+  var html='<div class="news-outer-grid">';
+  statics.forEach(function(item,i){
+    html+='<a class="news-card" href="'+item.link+'" target="_blank" rel="noopener" style="animation-delay:'+(i*60)+'ms">'
+      +'<div class="news-src-badge">'+item.src+'</div>'
+      +'<div class="news-title">'+item.title+'</div>'
+      +'<div class="news-meta"><span></span><span class="news-read">Читать →</span></div>'
+      +'</a>';
+  });
+  html+='</div>';
+  html+='<div style="text-align:center;padding:10px 0 4px">'
+    +'<span class="mono" style="font-size:8px;color:rgba(0,200,255,.35)">⚠ Лента в реальном времени недоступна — показаны рекомендованные материалы с nasa.gov</span>'
+    +'</div>';
+  grid.innerHTML=html;
+}
+
+function escHtml(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+resize();
+requestAnimationFrame(renderCanvas);
+buildCrew();buildKeyFacts();buildSystems();buildTimeline();
+setInterval(buildTimeline,60000);
+updatePhaseNav(getMET());
+updateUI();
+setInterval(updateUI,1000);
+loadNews();
+setInterval(loadNews,15*60*1000);
+</script>
+</body>
+</html>
