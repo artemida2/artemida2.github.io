@@ -1429,16 +1429,16 @@ function getState(met){
     var f=(t-0.35)/0.48;dE=6371+370+f*1600;speed=28000+f*200;gF=0.0001;
     phase='ICPS — ПОДЪЁМ ОРБИТЫ';desc='Криогенная разгонная ступень ICPS поднимает орбиту. Экипаж в невесомости — начинается адаптация. Первые часы в космосе.';
   } else if(t<5){
-    var f=(t-0.83)/4.17;dE=6371+1800+Math.sin(f*6)*2800;speed=28200;gF=0.0001;
+    var f=(t-0.83)/4.17;dE=6371+1800+(1+Math.sin(f*6))*1400;speed=28200;gF=0.0001;
     phase='ИСПЫТАНИЯ СБЛИЖЕНИЯ';desc='Орион отрабатывает манёвры сближения с верхней ступенью ICPS — репетиция стыковки с лунным модулем для Артемиды III.';
   } else if(t<24){
-    dE=6371+1800+Math.sin((t-5)/19*20)*2800;speed=28200;gF=0.0001;
+    dE=6371+1800+(1+Math.sin((t-5)/19*20))*1400;speed=28200;gF=0.0001;
     phase='ВЫСОКАЯ ЗЕМНАЯ ОРБИТА';desc='Экипаж проверяет все системы Ориона: навигацию, жизнеобеспечение, связь. За иллюминатором — голубой диск Земли на фоне абсолютной черноты.';
   } else if(t<27){
     var f=(t-24)/3;dE=6371+2200+f*f*18000;speed=28000+f*f*10500;gF=(f>.4&&f<.9)?.25:0.0001;
     phase='МАНЁВР ТЛИ — КУРС НА ЛУНУ 🔥';desc='Ступень ICPS включает двигатели почти на 20 минут (прирост скорости ≈ 900 м/с). Орион покидает земную орбиту и устремляется к Луне.';
   } else if(t<118){
-    var f=(t-27)/91,mp=f>.9?Math.pow((f-.9)/.1,2)*8000:0;
+    var f=(t-27)/91,mp=f>.9?Math.pow((f-.9)/.1,2)*1800:0;
     speed=38500*Math.pow(1-f*.72,.7)+mp+800;
     dE=24000+(352000-24000)*Math.pow(Math.sin(f*Math.PI*.5),1.2);gF=0.0001;
     if(t<48){phase='ПЕРЕЛЁТ К ЛУНЕ — ДЕНЬ 1';desc='Орион летит по дуге к Луне. Земля уменьшается, Луна растёт. Первый «лунный восход» за иллюминатором.';}
@@ -1448,7 +1448,7 @@ function getState(met){
   } else if(t<145){
     var f=(t-118)/27;
     dE=f<.5?352000+(f/.5)*(400171-352000)*Math.sin(f*Math.PI):400171-((f-.5)/.5)*(400171-360000);
-    speed=3200+Math.exp(-Math.pow((f-.35)*4,2))*20000+2500;gF=0.0001;
+    speed=3200+Math.exp(-Math.pow(f*3.5,2))*12000+2500;gF=0.0001;
     if(f<.15){phase='ПОДХОД С ВИДИМОЙ СТОРОНЫ';desc='Орион на подлёте к Луне с видимой стороны. Экипаж видит лунные моря крупным планом.';}
     else if(f<.40){phase='★ БЛИЖАЙШИЙ ПРОЛЁТ — 9 650 КМ';desc='ИСТОРИЧЕСКИЙ МОМЕНТ: первые люди у Луны за 53 года. Орион проносится в 9 650 км от поверхности.';}
     else if(f<.62){phase='ОБРАТНАЯ СТОРОНА 🌙';desc='Луна полностью блокирует радиосигнал. Экипаж временно изолирован — корабль летит автономно ~20 минут.';}
@@ -1465,8 +1465,28 @@ function getState(met){
     phase='✓ МИССИЯ ЗАВЕРШЕНА';desc='Экипаж вернулся. Дорога к Артемиде III открыта.';dE=6371;speed=0;gF=1;
   }
   var moonBase=384400-Math.sin(t/240*Math.PI)*22000;
-  var dM=Math.abs(dE-moonBase);
-  if(t>=118&&t<=145){var ff=(t-118)/27,b=Math.exp(-Math.pow((ff-.35)*4,2));dM=Math.max(9650,9650+(200000-9650)*(1-b));}
+  var dM;
+  if(met<0){
+    dM=Math.round(moonBase);
+  } else if(t<118){
+    /* Transit & Earth orbit: collinear approximation is valid,
+       ship is approaching Moon along roughly the Earth-Moon axis */
+    dM=Math.round(Math.max(9650,moonBase-dE));
+  } else if(t<=145){
+    /* Flyby phase: closest approach IS at t=118h (f=0), not t≈127.5h.
+       dM_start ≈ moonBase(118) − dE(118) ≈ 362406 − 352000 = 10406 km ≈ 9650 km from surface.
+       Use 11387 km (9650 + Moon radius 1737) as the physical minimum from Moon centre.
+       After flyby the ship recedes — power-law gives physically plausible growth. */
+    var ff=(t-118)/27;
+    var dM0=Math.max(9650,moonBase-352000); /* ≈ 10406 km at t=118, Moon centre distance */
+    dM=Math.round(dM0+(280000-dM0)*Math.pow(ff,0.85));
+  } else {
+    /* Return phase: ship heads home, Moon recedes from ~280 000 km → ~384 400 km.
+       Using direct |dE−moonBase| here gave only ~2 783 km at t=145 — a 100× error.
+       Smooth continuation from the flyby exit value instead. */
+    var ff2=(t-145)/(MH-145);
+    dM=Math.round(280000+(384400-280000)*Math.pow(ff2,0.6));
+  }
   var w=Math.sin(t*.4);
   return{dE:Math.round(dE),dM:Math.round(dM),speed:Math.round(speed),gF:gF<.001?.0001:gF,phase:phase,desc:desc,
     tH:Math.round(121+w*8),tC:Math.round(-157+Math.cos(t*.3)*12),tCa:Math.round(20+Math.sin(t*.1)*2.5),
