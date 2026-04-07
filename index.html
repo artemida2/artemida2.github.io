@@ -784,16 +784,103 @@ footer {
 
   </div>
 </div>
-<!-- Yandex.RTB R-A-19070339-1 -->
-<div id="yandex_rtb_R-A-19070339-1"></div>
-<script>
-window.yaContextCb.push(() => {
-    Ya.Context.AdvManager.render({
-        "blockId": "R-A-19070339-1",
-        "renderTo": "yandex_rtb_R-A-19070339-1"
-    })
-})
-</script>
+<style>
+    .artemis-poster-block {
+        /* Полупрозрачный фон, который подстроится под твой сайт */
+        background: rgba(15, 23, 42, 0.6); 
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px 20px;
+        max-width: 500px;
+        margin: 40px auto;
+        text-align: center;
+        font-family: 'Inter', -apple-system, sans-serif; /* Подстроится под шрифты сайта */
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Блок-заглушка для секретного постера */
+    .poster-mystery-box {
+        width: 180px;
+        height: 250px;
+        margin: 0 auto 24px auto;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 2px dashed #475569;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .poster-mystery-box::after {
+        content: "TOP SECRET";
+        font-weight: 800;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.15);
+        transform: rotate(-45deg);
+        letter-spacing: 2px;
+    }
+
+    .artemis-poster-block h3 {
+        color: #f8fafc;
+        font-size: 22px;
+        margin: 0 0 12px 0;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .artemis-poster-block p {
+        color: #94a3b8;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 24px;
+    }
+
+    .poster-price {
+        font-size: 28px;
+        color: #e2e8f0;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    .btn-buy-poster {
+        display: inline-block;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Космический синий */
+        color: #ffffff;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-buy-poster:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    }
+</style>
+
+<div class="artemis-poster-block">
+    <div class="poster-mystery-box"></div>
+    
+    <h3>Памятный постер миссии</h3>
+    <p>Эксклюзивный цифровой арт, посвященный первому за 50 лет полету к Луне. Дизайн строго засекречен — вы увидите его только после успешной стыковки (оплаты).</p>
+    
+    <div class="poster-price">500 ₽</div>
+    
+    <a href="https://yookassa.ru/my/i/adU7FBFtXiiR/l" target="_blank" class="btn-buy-poster">
+        Купить и рассекретить
+    </a>
+</div>
 <!-- ══ MISSION EXPLAINER ══ -->
 <div class="wrap section-gap">
   <div class="mono mb-3" style="font-size:9px;letter-spacing:3px;color:var(--cyan)">КАК ЭТО РАБОТАЕТ</div>
