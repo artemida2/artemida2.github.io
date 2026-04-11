@@ -588,9 +588,53 @@ footer {
 .text-center { text-align:center; }
 .section-gap { padding-bottom:24px; }
 
-/* ══════════════════════════════════════════
-   AD BLOCKS
-══════════════════════════════════════════ */
+/* ══ MISSION COMPLETE BANNER ══ */
+#mission-complete-bar {
+  background: linear-gradient(90deg, rgba(57,255,106,.12), rgba(0,200,255,.08), rgba(57,255,106,.12));
+  border-bottom: 2px solid rgba(57,255,106,.4);
+  padding: 10px 16px;
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  text-align: center;
+}
+
+/* ══ MISSION SLIDER ══ */
+#slider-section {
+  background: rgba(2,8,22,.97);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+#slider-section .sl-label {
+  font-family: 'Share Tech Mono', monospace; font-size: 7px;
+  letter-spacing: 2px; color: var(--sub); margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;
+}
+#mission-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
+  outline: none; cursor: pointer; margin: 6px 0;
+}
+#mission-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--cyan);
+  box-shadow: 0 0 10px rgba(0,200,255,.6); cursor: pointer;
+}
+#mission-slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--cyan);
+  box-shadow: 0 0 10px rgba(0,200,255,.6); cursor: pointer;
+}
+.sl-marks { display: flex; justify-content: space-between; font-family: 'Share Tech Mono', monospace; font-size: 6px; color: var(--sub); margin-top: 2px; }
+#sl-current { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--amber); }
+#sl-phase-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--cyan); }
+.sl-btn {
+  background: rgba(0,200,255,.1); border: 1px solid rgba(0,200,255,.3);
+  color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 8px;
+  letter-spacing: 1px; padding: 5px 12px; border-radius: 5px; cursor: pointer;
+  transition: all .2s;
+}
+.sl-btn:hover { background: rgba(0,200,255,.2); border-color: var(--cyan); }
 .ad-block {
   display: flex; justify-content: center; align-items: center;
   width: 100%; padding: 10px 0; overflow: hidden;
@@ -615,16 +659,24 @@ footer {
     </div>
     <div class="header-right">
       <div class="header-live">
-        <div class="ldot"></div>
-        <span>В ПОЛЁТЕ</span>
+        <div class="ldot" style="background:var(--green);box-shadow:0 0 8px var(--green);animation:none"></div>
+        <span style="color:var(--green)">ЗАВЕРШЕНА ✓</span>
       </div>
       <div class="header-met">
         <div class="header-met-label">ВРЕМЯ ПОЛЁТА</div>
-        <div class="header-met-val orb" id="h-met">T+00:00:00</div>
+        <div class="header-met-val orb" id="h-met">T+09:18:00</div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- ══ MISSION COMPLETE BAR ══ -->
+<div id="mission-complete-bar">
+  <span style="font-size:20px">🏁</span>
+  <span class="orb" style="font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px">МИССИЯ АРТЕМИДА II ЗАВЕРШЕНА</span>
+  <span class="mono" style="font-size:9px;color:rgba(57,255,106,.7)">Экипаж успешно вернулся · 11 апреля 2026</span>
+  <span style="font-size:14px">🌍</span>
+</div>
 
 <!-- ══ EVENT BANNER ══ -->
 <div id="event-banner">
@@ -639,6 +691,22 @@ footer {
     <span class="mono" style="font-size:6px;color:rgba(0,200,255,.22)">Интерактивная карта · наведите курсор</span>
   </div>
   <div id="cv-tooltip"></div>
+</div>
+
+<!-- ══ MISSION TIMELINE SLIDER ══ -->
+<div id="slider-section">
+  <div class="sl-label">
+    <span>⏱ ПЕРЕМОТКА МИССИИ — тащите ползунок, чтобы увидеть любой момент полёта</span>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="sl-current">T+09д 18:00:00</span>
+      <span id="sl-phase-label">✓ МИССИЯ ЗАВЕРШЕНА</span>
+      <button class="sl-btn" onclick="resetSliderToEnd()">К финалу ▶▶</button>
+    </div>
+  </div>
+  <input type="range" id="mission-slider" min="0" max="234" step="0.25" value="234">
+  <div class="sl-marks">
+    <span>Старт</span><span>ТЛИ T+27ч</span><span>Луна T+118ч</span><span>Возврат T+145ч</span><span>Посадка T+234ч</span>
+  </div>
 </div>
 
 <!-- AD 728x90 -->
@@ -1072,6 +1140,12 @@ var EVENTS = [
 ];
 
 function getMET(){return(Date.now()-LAUNCH_MS)/3600000;}
+/* Slider override — null means "real time", number means scrubbing */
+var sliderMET = MH; /* default: show completed state */
+var isSliding = false;
+
+function getViewMET(){ return sliderMET; }
+
 function pad(n){return String(Math.floor(Math.abs(n))).padStart(2,'0');}
 function fmtMET(h){
   var a=Math.abs(h)*3600,d=Math.floor(a/86400),
@@ -1293,7 +1367,7 @@ function renderCanvas(ts){
     var a=s.o*(.4+.6*Math.sin(ts/1000/s.d+s.ph));
     ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(s.x*CW,s.y*CH,s.r,0,Math.PI*2);ctx.fill();
   });
-  var met=getMET();var curMET=Math.max(0,Math.min(met,MH));
+  var met=getViewMET();var curMET=Math.max(0,Math.min(met,MH));
   ctx.save();ctx.setLineDash([3,6]);ctx.lineWidth=1;ctx.strokeStyle='rgba(0,80,160,0.28)';ctx.shadowBlur=0;
   ctx.beginPath();var started=false;
   PP.forEach(function(pt){
@@ -1390,8 +1464,11 @@ function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setBar(id,p){var e=document.getElementById(id);if(e)e.style.width=p+'%';}
 
 function updateUI(){
-  var met=getMET();var s=getState(met);
-  setEl('h-met',fmtMET(met));
+  var met=getViewMET();var s=getState(met);
+  var realMET=getMET();
+  /* Header MET — show real elapsed, capped at mission end */
+  var displayMET=Math.min(realMET,MH);
+  setEl('h-met',fmtMET(displayMET));
   setEl('last-upd',new Date().toLocaleTimeString('ru-RU'));
   setEl('v-speed',fmt(s.speed));setEl('v-de',fmt(s.dE));setEl('v-dm',fmt(s.dM));
   setEl('v-prog',parseFloat(s.prog).toFixed(1));
@@ -1406,7 +1483,7 @@ function updateUI(){
   setEl('fl-sig',s.sig);setEl('fl-laps',Math.round(s.dE/40075));
   setEl('fl-days',(s.dE/120/24/365.25).toFixed(1));
   setEl('fl-temp',s.tHeat>0?'+'+s.tHeat+' °C (щит раскалён!)':'солн. +'+s.tH+'°C  /  тень '+s.tC+'°C');
-  updateCountdown(met);updatePhaseNav(met);updateEventBanner(met);
+  updateCountdown(realMET);updatePhaseNav(met);updateEventBanner(met);
 }
 
 /* ── Countdown ── */
@@ -1728,15 +1805,56 @@ function escHtml(s){
 }
 
 /* ═══════════════════════════════════════
+   MISSION SLIDER LOGIC
+═══════════════════════════════════════ */
+function updateSliderLabel(h){
+  var sl=document.getElementById('sl-current');
+  var sp=document.getElementById('sl-phase-label');
+  if(sl)sl.textContent=fmtMET(h);
+  if(sp){
+    var s=getState(h);
+    sp.textContent=s.phase;
+    sp.style.color=h>=MH?'var(--green)':h>=MH*.5?'var(--cyan)':'var(--amber)';
+  }
+}
+function resetSliderToEnd(){
+  var sl=document.getElementById('mission-slider');
+  if(sl){sl.value=MH;}
+  sliderMET=MH;
+  updateSliderLabel(MH);
+  updateUI();buildTimeline();
+}
+(function initSlider(){
+  var sl=document.getElementById('mission-slider');
+  if(!sl)return;
+  sl.value=MH;
+  updateSliderLabel(MH);
+  sl.addEventListener('input',function(){
+    sliderMET=parseFloat(this.value);
+    updateSliderLabel(sliderMET);
+    updateUI();
+    buildTimeline();
+    updatePhaseNav(sliderMET);
+  });
+})();
+
+/* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
 resize();
 requestAnimationFrame(renderCanvas);
 buildCrew();buildKeyFacts();buildSystems();buildTimeline();
 setInterval(buildTimeline,60000);
-updatePhaseNav(getMET());
+updatePhaseNav(sliderMET);
 updateUI();
-setInterval(updateUI,1000);
+setInterval(function(){
+  /* Only auto-update header clock; don't override slider view */
+  var realMET=getMET();
+  var displayMET=Math.min(realMET,MH);
+  setEl('h-met',fmtMET(displayMET));
+  setEl('last-upd',new Date().toLocaleTimeString('ru-RU'));
+  updateCountdown(realMET);
+},1000);
 loadNews();
 setInterval(loadNews,15*60*1000);
 </script>
