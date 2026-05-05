@@ -207,6 +207,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   text-transform: uppercase;
 }
 .su-card-compare b { color: var(--amber); font-weight: 500; }
+.su-card-compare .su-compare-prev {
+  display: inline-block;
+  margin-top: 4px;
+  color: rgba(207,230,255,0.62);
+  font-size: 11px;
+}
 
 .su-card-actions {
   display: flex;

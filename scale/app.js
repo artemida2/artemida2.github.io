@@ -37,6 +37,10 @@
       ordersLargerThanYou: 'на {n} порядков больше тебя',
       ordersSmallerThanYou: 'на {n} порядков меньше тебя',
       sameAsYou: 'примерно равно тебе',
+      vsPrevLarger: 'в {n} раз больше «{name}»',
+      vsPrevSmaller: 'в {n} раз меньше «{name}»',
+      vsPrevOrdersLarger: 'на {n} порядков больше «{name}»',
+      vsPrevOrdersSmaller: 'на {n} порядков меньше «{name}»',
       meters: 'м',
       kilometers: 'км',
       lightYears: 'св. лет',
@@ -83,6 +87,10 @@
       ordersLargerThanYou: '{n} orders larger than you',
       ordersSmallerThanYou: '{n} orders smaller than you',
       sameAsYou: 'about your size',
+      vsPrevLarger: '{n}× larger than “{name}”',
+      vsPrevSmaller: '{n}× smaller than “{name}”',
+      vsPrevOrdersLarger: '{n} orders larger than “{name}”',
+      vsPrevOrdersSmaller: '{n} orders smaller than “{name}”',
       meters: 'm',
       kilometers: 'km',
       lightYears: 'ly',
@@ -483,6 +491,41 @@
     return `${rounded} ${unit}`;
   }
 
+  /* Возвращает предыдущий якорь (меньшего размера) перед obj. */
+  function prevObject(obj) {
+    let best = null;
+    for (let i = 0; i < OBJECTS.length; i++) {
+      const o = OBJECTS[i];
+      if (o.log >= obj.log - 0.001) continue;
+      if (!best || o.log > best.log) best = o;
+    }
+    return best;
+  }
+
+  function compareToPrev(obj, lang) {
+    const T = I18N[lang || LANG];
+    const p = prevObject(obj);
+    if (!p) return '';
+    const dlog = obj.log - p.log;
+    if (Math.abs(dlog) < 0.05) return '';
+    const factor = Math.pow(10, Math.abs(dlog));
+    const compact = (n) => {
+      if (n < 10) return n.toFixed(2);
+      if (n < 100) return n.toFixed(1);
+      if (n < 1e4) return Math.round(n).toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU');
+      const e = Math.floor(Math.log10(n));
+      const mant = n / Math.pow(10, e);
+      const m = (Math.abs(mant - Math.round(mant)) < 0.05) ? Math.round(mant) : mant.toFixed(1);
+      return `${m}\u00d710<sup>${e}</sup>`;
+    };
+    if (Math.abs(dlog) < 4) {
+      const tpl = dlog > 0 ? T.vsPrevLarger : T.vsPrevSmaller;
+      return tpl.replace('{n}', compact(factor)).replace('{name}', p.name[lang || LANG]);
+    }
+    const tpl = dlog > 0 ? T.vsPrevOrdersLarger : T.vsPrevOrdersSmaller;
+    return tpl.replace('{n}', Math.abs(dlog).toFixed(0)).replace('{name}', p.name[lang || LANG]);
+  }
+
   function compareToHuman(obj, lang) {
     const T = I18N[lang || LANG];
     if (!HUMAN) return '';
@@ -556,62 +599,206 @@
     canvas.style.height = window.innerHeight + 'px';
   }
 
+  /* ──────────────────────────────────────────────
+     Рендер: «лента» / ribbon layout
+     Объекты выкладываются по горизонтали в логарифмический ряд.
+     Камера = state.logScale, центрируется на текущей точке.
+     x_obj = cx + (o.log - L) * X_PER_LOG
+     size_obj = RIBBON_BASE * SIZE_GROWTH^(o.log - L)
+     ────────────────────────────────────────────── */
   function drawScene() {
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
     const cx = W / 2, cy = H / 2;
-    const baseSize = Math.min(W, H) * 0.42;
     const log = state.logScale;
     const epoch = epochBlend(log);
-    /* Объекты в окне ±2 порядка */
+
+    /* Базовый размер «текущего» объекта (≈18 % от меньшей стороны экрана). */
+    const RIBBON_BASE = Math.min(W, H) * 0.20;
+    /* Сколько px между соседями, разнесёнными на 1 порядок. */
+    const X_PER_LOG = Math.min(W * 0.42, RIBBON_BASE * 3.6);
+    /* Множитель размера на 1 порядок: √10 ≈ 3.16. */
+    const SIZE_GROWTH = Math.sqrt(10);
+    /* Диапазон видимости (в порядках) от текущей точки. */
+    const VISIBLE_HALF_WINDOW = 2.2;
+
+    /* Собираем рендер-список с метаданными — пригодится для соединительных линий. */
+    const items = [];
     for (let i = 0; i < OBJECTS.length; i++) {
       const o = OBJECTS[i];
-      const dlog = o.log - log; /* >0 — крупнее текущего масштаба */
-      if (dlog < -2.2 || dlog > 2.2) continue;
-      const screenSize = baseSize * Math.pow(10, dlog);
-      const fade = 1 - Math.min(1, Math.abs(dlog) / 2.2);
-      const alpha = Math.pow(fade, 1.6);
-      drawObject(o, cx, cy, screenSize, alpha, epoch);
+      const dlog = o.log - log;
+      if (dlog < -VISIBLE_HALF_WINDOW || dlog > VISIBLE_HALF_WINDOW) continue;
+      const x = cx + dlog * X_PER_LOG;
+      const size = RIBBON_BASE * Math.pow(SIZE_GROWTH, dlog);
+      if (size < 1.5) continue;
+      /* Cull off-screen — но с запасом, чтобы крупные объекты могли «выглядывать». */
+      if (x + size * 0.6 < -40 || x - size * 0.6 > W + 40) continue;
+      const fadeWindow = 1 - Math.min(1, Math.abs(dlog) / VISIBLE_HALF_WINDOW);
+      let alpha = Math.pow(fadeWindow, 1.4);
+      const isFocus = Math.abs(dlog) < 0.25;
+      if (isFocus) alpha = 1;
+      items.push({ o, dlog, x, size, alpha, isFocus });
     }
-    /* Маркер «ты здесь» — точка центра при не-человеческих масштабах */
-    if (Math.abs(log - HUMAN_LOG) > 1) {
+    /* Сортируем слева направо — для соединительных линий. */
+    items.sort((a, b) => a.dlog - b.dlog);
+
+    /* Соединительные линии между соседями + маркеры «×N». */
+    for (let i = 0; i < items.length - 1; i++) {
+      const a = items[i], b = items[i + 1];
+      const lineAlpha = Math.min(a.alpha, b.alpha) * 0.35;
+      if (lineAlpha < 0.04) continue;
+      const ax = a.x + a.size * 0.5, bx = b.x - b.size * 0.5;
+      if (bx - ax < 12 * dpr) continue;
       ctx.save();
-      ctx.globalAlpha = 0.4;
-      ctx.strokeStyle = '#ffffff';
+      ctx.globalAlpha = lineAlpha;
+      ctx.strokeStyle = epoch.accent.replace(/[\d.]+\)$/, '0.55)');
       ctx.lineWidth = 1 * dpr;
-      ctx.setLineDash([4*dpr, 4*dpr]);
+      ctx.setLineDash([3 * dpr, 4 * dpr]);
       ctx.beginPath();
-      ctx.arc(cx, cy, 6 * dpr, 0, Math.PI*2);
+      ctx.moveTo(ax, cy);
+      ctx.lineTo(bx, cy);
       ctx.stroke();
+      ctx.setLineDash([]);
+      /* Метка ratio посередине. */
+      const ratio = Math.pow(10, b.o.log - a.o.log);
+      const ratioStr = ratio >= 1000 ? `×10^${Math.round(Math.log10(ratio))}` : `×${formatRatio(ratio)}`;
+      const midX = (ax + bx) / 2, midY = cy - 8 * dpr;
+      ctx.globalAlpha = lineAlpha * 1.8;
+      ctx.fillStyle = '#cfe6ff';
+      ctx.font = `${10 * dpr}px 'Share Tech Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(ratioStr, midX, midY);
       ctx.restore();
     }
+
+    /* Объекты:
+       — сначала «дальние» (по |dlog|) фоном,
+       — потом ближние,
+       — фокус последним, чтобы он гарантированно был сверху. */
+    const renderOrder = items.slice().sort((a, b) => Math.abs(b.dlog) - Math.abs(a.dlog));
+    for (const it of renderOrder) {
+      if (it.isFocus) continue;
+      drawObject(it.o, it.x, cy, it.size, it.alpha, epoch, false);
+    }
+    const focus = items.find(it => it.isFocus);
+    if (focus) drawObject(focus.o, focus.x, cy, focus.size, focus.alpha, epoch, true);
+
+    /* Подложка-полоса под фокусом — узкая «нулевая линия» ленты. */
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.strokeStyle = epoch.accent.replace(/[\d.]+\)$/, '0.6)');
+    ctx.lineWidth = 1 * dpr;
+    ctx.setLineDash([2 * dpr, 6 * dpr]);
+    ctx.beginPath();
+    ctx.moveTo(0, cy + Math.min(W, H) * 0.18);
+    ctx.lineTo(W, cy + Math.min(W, H) * 0.18);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    /* «Ты здесь» — пин-маркер с человеком при удалении от человеческого масштаба. */
+    drawHumanMarker(cx, cy, log, W, H, epoch);
   }
 
-  function drawObject(o, cx, cy, size, alpha, epoch) {
+  function formatRatio(r) {
+    if (r >= 100) return Math.round(r).toLocaleString(LANG === 'en' ? 'en-US' : 'ru-RU');
+    if (r >= 10) return r.toFixed(1);
+    return r.toFixed(2);
+  }
+
+  /* Маркер «человек 1.7 м» — постоянная точка отсчёта в правом-верхнем углу
+     при удалении от человеческого масштаба. Не пересекается с brand/footer. */
+  function drawHumanMarker(cx, cy, log, W, H, epoch) {
+    if (!HUMAN) return;
+    const dlog = HUMAN.log - log;
+    if (Math.abs(dlog) < 2.0) return;
+    /* Под прогресс-баром справа, не перекрывая шкалу эпох. */
+    const padX = 88 * dpr, padY = 18 * dpr;
+    const r = 14 * dpr;
+    const boxW = 132 * dpr;
+    const px = W - padX - boxW + r + 10 * dpr;
+    const py = H - padY - r - 4 * dpr;
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = 'rgba(2,8,22,0.72)';
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(W - padX - boxW, py - r - 8 * dpr, boxW, r * 2 + 16 * dpr, 8 * dpr);
+      ctx.fill();
+    } else {
+      ctx.fillRect(W - padX - boxW, py - r - 8 * dpr, boxW, r * 2 + 16 * dpr);
+    }
+    ctx.strokeStyle = 'rgba(0,200,255,0.32)';
+    ctx.lineWidth = 1 * dpr;
+    ctx.stroke();
+    drawKind(HUMAN, px, py, r, epoch);
+    ctx.fillStyle = '#cfe6ff';
+    ctx.font = `${9 * dpr}px 'Share Tech Mono', monospace`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(LANG === 'en' ? 'YOU · 1.7 m' : 'ТЫ · 1.7 м', px + r + 10 * dpr, py - 5 * dpr);
+    const f = nearestObject(log).obj;
+    if (f && f !== HUMAN) {
+      const ratioLog = f.log - HUMAN.log;
+      let ratioStr;
+      if (Math.abs(ratioLog) < 4) {
+        const ratio = Math.pow(10, Math.abs(ratioLog));
+        ratioStr = (ratioLog > 0 ? '×' : '÷') + formatRatio(ratio);
+      } else {
+        ratioStr = (ratioLog > 0 ? '10^+' : '10^') + Math.round(ratioLog).toString();
+      }
+      ctx.fillStyle = epoch.accent.replace(/[\d.]+\)$/, '1)');
+      ctx.font = `${9 * dpr}px 'Share Tech Mono', monospace`;
+      ctx.fillText(ratioStr, px + r + 10 * dpr, py + 8 * dpr);
+    }
+    ctx.restore();
+  }
+
+  function drawObject(o, cx, cy, size, alpha, epoch, isFocus) {
     if (size < 0.5 || alpha <= 0.01) return;
     ctx.save();
     ctx.globalAlpha = alpha;
     const r = size * 0.5;
-    /* Свечение/контур */
-    const grd = ctx.createRadialGradient(cx, cy, r * 0.05, cx, cy, r * 1.4);
-    grd.addColorStop(0, epoch.accent.replace(/[\d.]+\)$/, '0.45)'));
-    grd.addColorStop(0.5, epoch.accent.replace(/[\d.]+\)$/, '0.18)'));
+    /* Подложка-свечение — у фокуса ярче и шире. */
+    const glowAlpha = isFocus ? 0.55 : 0.28;
+    const glowAlpha2 = isFocus ? 0.22 : 0.10;
+    const grd = ctx.createRadialGradient(cx, cy, r * 0.05, cx, cy, r * 1.6);
+    grd.addColorStop(0, epoch.accent.replace(/[\d.]+\)$/, glowAlpha + ')'));
+    grd.addColorStop(0.5, epoch.accent.replace(/[\d.]+\)$/, glowAlpha2 + ')'));
     grd.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = grd;
-    ctx.beginPath(); ctx.arc(cx, cy, r * 1.4, 0, Math.PI*2); ctx.fill();
-    /* Тип объекта — процедурный «жетон» */
+    ctx.beginPath(); ctx.arc(cx, cy, r * 1.6, 0, Math.PI*2); ctx.fill();
+    /* Тип объекта — процедурный «жетон». */
     drawKind(o, cx, cy, r, epoch);
-    /* Подпись (только для якоря в фокусе) */
-    if (Math.abs(o.log - state.logScale) < 0.18 && size > 60) {
+    /* Тонкая обводка фокуса для «киношности». */
+    if (isFocus && size > 30) {
+      ctx.strokeStyle = epoch.accent.replace(/[\d.]+\)$/, '0.85)');
+      ctx.lineWidth = Math.max(1, 1.4 * dpr);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.08, 0, Math.PI*2);
+      ctx.stroke();
+    }
+    /* Подпись:
+       — фокусу всегда (большим шрифтом),
+       — соседям с size > 22 — мелким шрифтом сверху. */
+    if (isFocus && size > 30) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `${14 * dpr}px 'Orbitron', monospace`;
+      ctx.font = `${15 * dpr}px 'Orbitron', monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.shadowColor = epoch.accent.replace(/[\d.]+\)$/, '0.9)');
-      ctx.shadowBlur = 18 * dpr;
+      ctx.shadowBlur = 22 * dpr;
       const label = o.name[LANG];
-      ctx.fillText(label.toUpperCase(), cx, cy - r - 22 * dpr);
+      ctx.fillText(label.toUpperCase(), cx, cy - r - 26 * dpr);
       ctx.shadowBlur = 0;
+    } else if (!isFocus && size > 22) {
+      ctx.globalAlpha = alpha * 0.85;
+      ctx.fillStyle = '#cfe6ff';
+      ctx.font = `${10 * dpr}px 'Share Tech Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(o.name[LANG].toUpperCase(), cx, cy - r - 14 * dpr);
     }
     ctx.restore();
   }
@@ -975,7 +1162,13 @@
       cardTitle.textContent = obj.name[LANG];
       cardSize.innerHTML = formatSize(obj.m, LANG);
       cardFact.textContent = obj.fact[LANG];
-      cardCompare.innerHTML = obj.you ? `<b>${T.youAre}</b>` : compareToHuman(obj, LANG);
+      if (obj.you) {
+        cardCompare.innerHTML = `<b>${T.youAre}</b>`;
+      } else {
+        const vsPrev = compareToPrev(obj, LANG);
+        const vsYou = compareToHuman(obj, LANG);
+        cardCompare.innerHTML = vsYou + (vsPrev ? `<br><span class="su-compare-prev">${vsPrev}</span>` : '');
+      }
       lastCardId = obj.id;
       /* Динамический title и URL */
       document.title = T.shareTitle.replace('{name}', obj.name[LANG]).replace('{size}', stripHtml(formatSize(obj.m, LANG)));
