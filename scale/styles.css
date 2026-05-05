@@ -492,3 +492,23 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   max-width: 800px;
   margin: 0 auto;
 }
+
+/* ═══════════════ Embed-режим (?embed=1)
+   Используется при встраивании /scale/ через iframe на главной.
+   Показываем только canvas — без шапки, карточки, прогресс-бара,
+   подсказок, зум-кнопок и футера. ═══════════════ */
+html.su-embed,
+html.su-embed body {
+  background: transparent;
+}
+html.su-embed .su-header,
+html.su-embed .su-card,
+html.su-embed .su-progress,
+html.su-embed .su-zoom,
+html.su-embed .su-hint,
+html.su-embed .su-search,
+html.su-embed .su-toast,
+html.su-embed footer,
+html.su-embed .su-footer { display: none !important; }
+html.su-embed .su-static-list { display: none; }
+html.su-embed body { overflow: hidden; }

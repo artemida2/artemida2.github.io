@@ -3,15 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Артемида-2: Онлайн-трекер миссии, карта полета и трансляция NASA</title>
-<meta name="description" content="Следите за полетом миссии Artemis II к Луне в реальном времени. Интерактивная карта, лайв-трекер корабля Orion, последние новости и прямая трансляция NASA.">
-<meta name="keywords" content="Артемида 2, Artemis II, полет на луну, трекер миссии, карта полета, Orion, NASA онлайн, космос">
+<title>Артемида: Масштаб Вселенной — от кварка до Хаббла. Интерактивный скролл</title>
+<meta name="description" content="Прокрути всю Вселенную одной прокруткой: 62 порядка величины — от планковской длины до диаметра наблюдаемой Вселенной. ~60 объектов, факты, сравнения, шеринг. Бонус: архив завершённой миссии «Артемида II» к Луне.">
+<meta name="keywords" content="масштаб вселенной, scale of universe, от кварка до хаббла, интерактивный космос, размеры объектов, планковская длина, наблюдаемая вселенная, Артемида 2, Artemis II, лунная миссия, NASA, Orion">
 <meta name="takprodam-verification" content="174c890d-4e59-4f04-afed-e2d4ca6873ac">
+<link rel="canonical" href="https://artemida2.github.io/">
+<link rel="alternate" hreflang="ru" href="https://artemida2.github.io/">
+<link rel="alternate" hreflang="es" href="https://artemida2.github.io/es/">
+<link rel="alternate" hreflang="x-default" href="https://artemida2.github.io/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://artemida2.github.io/">
-<meta property="og:title" content="Лайв-трекер лунной миссии «Артемида-2»">
-<meta property="og:description" content="Где сейчас корабль Orion? Интерактивная карта полета, таймер и прямая трансляция NASA. Подключайся к историческому событию!">
-<meta property="og:image" content="https://artemida2.github.io/preview.jpg"> <meta property="og:site_name" content="Artemis II Live Tracker">
+<meta property="og:title" content="Артемида: Масштаб Вселенной — от кварка до Хаббла">
+<meta property="og:description" content="Прокрути 62 порядка величины — от планковской длины до диаметра наблюдаемой Вселенной. ~60 объектов с фактами и сравнениями. Бонус: архив миссии «Артемида II».">
+<meta property="og:image" content="https://artemida2.github.io/preview.jpg">
+<meta property="og:site_name" content="Артемида: Масштаб Вселенной">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Артемида: Масштаб Вселенной — от кварка до Хаббла">
+<meta name="twitter:description" content="62 порядка величины одной прокруткой. Открой свой масштаб.">
+<meta name="twitter:image" content="https://artemida2.github.io/preview.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Артемида: Масштаб Вселенной",
+  "url": "https://artemida2.github.io/",
+  "description": "Интерактивный логарифмический скролл по 62 порядкам величины — от планковской длины до диаметра наблюдаемой Вселенной.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["ru", "en", "es"],
+  "isAccessibleForFree": true
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -138,9 +160,213 @@ header {
 .header-met-label { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: var(--sub); letter-spacing: 2px; }
 .header-met-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: var(--amber); letter-spacing: 2px; }
 
+.header-nav {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+}
+.header-nav a, .header-nav button {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--txt);
+  text-transform: uppercase; cursor: pointer;
+  background: rgba(0,200,255,0.04);
+  transition: border-color .18s, background .18s, color .18s;
+  white-space: nowrap;
+}
+.header-nav a:hover, .header-nav button:hover {
+  border-color: var(--cyan); color: var(--cyan);
+  background: rgba(0,200,255,0.08);
+}
+.header-nav a.cta {
+  background: linear-gradient(90deg, rgba(0,200,255,0.18), rgba(192,96,255,0.18));
+  border-color: rgba(0,200,255,0.55);
+  color: #fff; font-weight: 600;
+}
+.header-nav a.cta:hover {
+  border-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(0,200,255,0.28), rgba(192,96,255,0.28));
+}
+.header-nav .lang-pill { padding: 6px 8px; font-size: 9px; opacity: .8; }
+.header-nav .lang-pill.active { color: var(--cyan); border-color: var(--cyan); opacity: 1; }
+
+@media (max-width: 720px) {
+  .header-nav a.cta .cta-long { display: none; }
+}
 @media (max-width: 480px) {
   .header-sub { display: none; }
-  .header-live { display: none; }
+  .header-nav .archive-link, .header-nav .lang-pill[data-lang="es"] { display: none; }
+  .header-nav { gap: 6px; }
+  .header-nav a, .header-nav button { padding: 5px 7px; font-size: 9px; }
+}
+
+/* ══════════════════════════════════════════
+   HERO — «МАСШТАБ ВСЕЛЕННОЙ»
+══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  padding: 28px 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 60%, rgba(0,200,255,0.08), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 30% 30%, rgba(192,96,255,0.07), transparent 70%);
+  overflow: hidden;
+}
+.hero-grid {
+  max-width: 1320px; margin: 0 auto;
+  display: grid; gap: 22px;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+@media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; gap: 18px; } }
+
+.hero-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 4px;
+  color: var(--cyan); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.hero-eyebrow .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+  animation: blink 2.4s ease-in-out infinite;
+}
+.hero-h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900; line-height: 1.05;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #fff 0%, var(--cyan) 50%, var(--purple) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
+}
+.hero-h1 .accent {
+  background: linear-gradient(90deg, var(--orange), var(--amber));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-lead {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.5; color: var(--txt);
+  max-width: 540px; margin-bottom: 20px;
+}
+.hero-lead b { color: #fff; font-weight: 600; }
+.hero-stats {
+  display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 22px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.hero-stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px; font-weight: 700;
+  color: var(--cyan);
+  display: block; line-height: 1.1;
+}
+.hero-stat-lbl {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--sub); text-transform: uppercase;
+}
+.hero-cta-row {
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 22px;
+  border-radius: 10px; border: 1px solid var(--border2);
+  font-family: 'Orbitron', monospace;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #fff; cursor: pointer;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+  background: rgba(2,8,22,.6);
+}
+.hero-cta:hover { transform: translateY(-1px); }
+.hero-cta-primary {
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  border: none; color: #050;
+  color: #001020;
+  box-shadow: 0 0 0 1px rgba(0,200,255,.4), 0 8px 30px rgba(0,200,255,.25);
+}
+.hero-cta-primary:hover { box-shadow: 0 0 0 1px rgba(0,200,255,.6), 0 10px 40px rgba(0,200,255,.4); }
+.hero-cta-ghost { color: var(--cyan); }
+.hero-cta-ghost:hover { border-color: var(--cyan); color: #fff; box-shadow: 0 0 24px rgba(0,200,255,.18); }
+.hero-cta .arr { font-size: 16px; }
+
+.hero-frame {
+  display: block; width: 100%;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  background: #010206;
+  aspect-ratio: 16 / 10;
+  box-shadow: 0 0 0 1px rgba(0,200,255,.18), 0 18px 60px rgba(0,200,255,.12), 0 0 80px rgba(192,96,255,.1);
+  text-decoration: none;
+}
+.hero-frame:hover { box-shadow: 0 0 0 1px rgba(0,200,255,.4), 0 24px 70px rgba(0,200,255,.22), 0 0 100px rgba(192,96,255,.18); }
+.hero-frame iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0; display: block;
+}
+.hero-frame .frame-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(2,8,22,0.55) 0%, rgba(2,8,22,0) 30%);
+}
+.hero-frame .frame-cap {
+  position: absolute; left: 14px; bottom: 12px; right: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--cyan); text-transform: uppercase;
+  pointer-events: none;
+}
+.hero-frame .frame-cap .more {
+  color: rgba(189,216,240,.7);
+  font-size: 9px; letter-spacing: 1px;
+}
+
+@media (max-width: 980px) {
+  .hero-frame { aspect-ratio: 16 / 11; }
+  .hero { padding: 22px 14px 20px; }
+}
+
+/* ══════════════════════════════════════════
+   ARCHIVE HEADING
+══════════════════════════════════════════ */
+.archive-heading {
+  max-width: 1320px; margin: 28px auto 4px; padding: 0 16px;
+}
+.archive-heading .eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 4px;
+  color: var(--amber); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.archive-heading .eyebrow::before {
+  content: '◆';
+  color: var(--amber);
+  text-shadow: 0 0 8px rgba(255,184,48,.6);
+}
+.archive-heading h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800; letter-spacing: 0.04em;
+  color: #fff; margin: 6px 0 4px;
+}
+.archive-heading p {
+  font-size: 14px; color: var(--sub);
+  max-width: 720px;
+}
+.archive-divider {
+  max-width: 1320px; margin: 18px auto 0; padding: 0 16px;
+}
+.archive-divider hr {
+  border: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
 }
 
 /* ══════════════════════════════════════════
@@ -588,15 +814,6 @@ footer {
 .text-center { text-align:center; }
 .section-gap { padding-bottom:24px; }
 
-/* ══ MISSION COMPLETE BANNER ══ */
-#mission-complete-bar {
-  background: linear-gradient(90deg, rgba(57,255,106,.12), rgba(0,200,255,.08), rgba(57,255,106,.12));
-  border-bottom: 2px solid rgba(57,255,106,.4);
-  padding: 10px 16px;
-  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
-  text-align: center;
-}
-
 /* ══ MISSION SLIDER ══ */
 #slider-section {
   background: rgba(2,8,22,.97);
@@ -649,34 +866,85 @@ footer {
 <!-- ══ HEADER ══ -->
 <header>
   <div class="header-inner">
-    <div class="header-brand">
-      <span class="header-icon">🚀</span>
+    <a href="/" class="header-brand" style="text-decoration:none">
+      <span class="header-icon">🌌</span>
       <div class="header-divider"></div>
       <div class="min-w-0">
-        <div class="header-title shine">АРТЕМИДА II</div>
-        <div class="header-sub">ПЕРВЫЙ ПОЛЁТ ЛЮДЕЙ К ЛУНЕ ЗА 53 ГОДА</div>
+        <div class="header-title shine">АРТЕМИДА</div>
+        <div class="header-sub">МАСШТАБ ВСЕЛЕННОЙ · ОТ КВАРКА ДО ХАББЛА</div>
       </div>
-    </div>
-    <div class="header-right">
-      <div class="header-live">
-        <div class="ldot" style="background:var(--green);box-shadow:0 0 8px var(--green);animation:none"></div>
-        <span style="color:var(--green)">ЗАВЕРШЕНА ✓</span>
-      </div>
-      <div class="header-met">
-        <div class="header-met-label">ВРЕМЯ ПОЛЁТА</div>
-        <div class="header-met-val orb" id="h-met">T+09:18:00</div>
-      </div>
-    </div>
+    </a>
+    <nav class="header-nav" aria-label="Навигация">
+      <a class="cta" href="/scale/" title="Открыть интерактив «Масштаб Вселенной»">
+        <span>🌌 МАСШТАБ</span>
+        <span class="cta-long">— ОТКРЫТЬ</span>
+      </a>
+      <a class="archive-link" href="#archive" title="Архив миссии Артемида II">АРХИВ МИССИИ</a>
+      <a class="lang-pill active" data-lang="ru" href="/" aria-current="page" title="Русский">RU</a>
+      <a class="lang-pill" data-lang="en" href="/scale/en/" hreflang="en" title="English (Scale)">EN</a>
+      <a class="lang-pill" data-lang="es" href="/es/" hreflang="es" title="Español">ES</a>
+    </nav>
   </div>
 </header>
 
-<!-- ══ MISSION COMPLETE BAR ══ -->
-<div id="mission-complete-bar">
-  <span style="font-size:20px">🏁</span>
-  <span class="orb" style="font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px">МИССИЯ АРТЕМИДА II ЗАВЕРШЕНА</span>
-  <span class="mono" style="font-size:9px;color:rgba(57,255,106,.7)">Экипаж успешно вернулся · 11 апреля 2026</span>
-  <span style="font-size:14px">🌍</span>
+<!-- ══ HERO — «МАСШТАБ ВСЕЛЕННОЙ» ══ -->
+<section class="hero" id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span> Главный интерактив</div>
+      <h1 class="hero-h1">Прокрути всю <span class="accent">Вселенную</span></h1>
+      <p class="hero-lead">
+        62 порядка величины — от <b>планковской длины</b> (10⁻³⁵ м) до диаметра <b>наблюдаемой Вселенной</b> (≈10²⁷ м). Около 60 объектов с фактами, сравнениями относительно тебя и шерингом. Просто крути колесо.
+      </p>
+      <div class="hero-stats">
+        <div>
+          <span class="hero-stat-num">10<sup>62</sup></span>
+          <span class="hero-stat-lbl">Порядков величины</span>
+        </div>
+        <div>
+          <span class="hero-stat-num">~60</span>
+          <span class="hero-stat-lbl">Объектов</span>
+        </div>
+        <div>
+          <span class="hero-stat-num">8</span>
+          <span class="hero-stat-lbl">Цветовых эпох</span>
+        </div>
+      </div>
+      <div class="hero-cta-row">
+        <a class="hero-cta hero-cta-primary" href="/scale/" data-cta="ru">
+          <span>🌌 ОТКРЫТЬ МАСШТАБ</span>
+          <span class="arr">→</span>
+        </a>
+        <a class="hero-cta hero-cta-ghost" href="/scale/en/" hreflang="en" data-cta="en">
+          <span>🌍 ENGLISH VERSION</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <a class="hero-frame" href="/scale/?focus=milkyway" aria-label="Открыть интерактивный масштаб Вселенной — Млечный путь">
+        <iframe
+          src="/scale/?focus=milkyway&amp;embed=1"
+          loading="lazy"
+          title="Превью: Масштаб Вселенной — Млечный путь"
+          tabindex="-1"
+          aria-hidden="true"></iframe>
+        <div class="frame-overlay"></div>
+        <div class="frame-cap">
+          <span>● Млечный путь · ≈10²¹ м</span>
+          <span class="more">Клик — открыть в полный экран →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ARCHIVE HEADING ══ -->
+<div class="archive-heading" id="archive">
+  <div class="eyebrow">АРХИВ · ЗАВЕРШЁННАЯ МИССИЯ</div>
+  <h2>Артемида II — первый полёт людей к Луне за 53 года</h2>
+  <p>Миссия завершилась 11 апреля 2026 года. Ниже — телеметрия и интерактивная карта траектории, рассчитанные по физической модели. Это исторический архив, оставляем для тех, кто хочет посмотреть, как всё было.</p>
 </div>
+<div class="archive-divider"><hr></div>
 
 <!-- ══ EVENT BANNER ══ -->
 <div id="event-banner">
@@ -1054,8 +1322,8 @@ footer {
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-copy">NASA JSC · DEEP SPACE NETWORK · ORION «INTEGRITY» · T-0: 1 АПР 2026, 22:35 UTC</div>
-      <div class="footer-legal">Данные рассчитаны по физической модели. Не является официальной телеметрией NASA.</div>
+      <div class="footer-copy">АРТЕМИДА · МАСШТАБ ВСЕЛЕННОЙ &nbsp;·&nbsp; <a href="/scale/" style="color:var(--cyan)">/scale/</a> &nbsp;·&nbsp; <a href="/scale/en/" style="color:var(--cyan)">/scale/en/</a> &nbsp;·&nbsp; <a href="/es/" style="color:var(--cyan)">/es/</a></div>
+      <div class="footer-legal">Архив миссии: NASA JSC · DSN · Orion «Integrity» · T-0: 1 апр 2026. Данные миссии рассчитаны по физической модели — не является официальной телеметрией NASA.</div>
     </div>
     <div class="footer-right">
       <div class="footer-upd">Обновлено: <span id="last-upd">--</span></div>

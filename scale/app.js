@@ -418,6 +418,10 @@
   const params = new URLSearchParams(location.search);
   const focusId = params.get('focus');
   const scaleParam = params.get('scale');
+  /* Embed-режим (для встраивания в iframe на главной): убираем шапку,
+     карточку, прогресс-бар, зум-кнопки, подсказку, футер — только canvas. */
+  const isEmbed = params.get('embed') === '1';
+  state.embed = isEmbed;
   if (focusId) {
     const f = OBJECTS.find(o => o.id === focusId);
     if (f) { state.logScale = state.targetLog = f.log; state.showHint = false; }
@@ -427,6 +431,7 @@
   } else {
     state.logScale = state.targetLog = HUMAN_LOG; // стартуем с человека
   }
+  if (isEmbed) state.showHint = false;
 
   /* ──────────────────────────────────────────────
      DOM-узлы (создадим в init)
@@ -1281,6 +1286,7 @@
      Инициализация
      ────────────────────────────────────────────── */
   function init() {
+    if (state.embed) document.documentElement.classList.add('su-embed');
     canvas = document.getElementById('su-canvas');
     ctx = canvas.getContext('2d');
     bg = document.getElementById('su-bg');

@@ -6,15 +6,33 @@
 <link rel="alternate" hreflang="es" href="https://artemida2.github.io/es/" />
 <link rel="alternate" hreflang="x-default" href="https://artemida2.github.io/" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Artemis II: Rastreador en vivo, mapa de la misión y transmisión de la NASA</title>
-<meta name="description" content="Sigue el vuelo de la misión Artemis II a la Luna en tiempo real. Mapa interactivo, rastreador en vivo de la nave Orion, últimas noticias y transmisión en directo de la NASA.">
-<meta name="keywords" content="Artemis 2, Artemis II, vuelo a la luna, rastreador de misión, mapa de vuelo, Orion, NASA en vivo, espacio, cohete SLS">
+<title>Artemis: Escala del Universo — del quark al Hubble. Scroll interactivo</title>
+<meta name="description" content="Recorre todo el Universo con un solo scroll: 62 órdenes de magnitud — de la longitud de Planck al diámetro del Universo observable. ~60 objetos con datos, comparaciones y compartir. Bonus: archivo de la misión Artemis II a la Luna.">
+<meta name="keywords" content="escala del universo, scale of universe, del quark al hubble, espacio interactivo, tamaños de objetos, longitud de planck, universo observable, Artemis 2, Artemis II, misión lunar, NASA, Orion">
 <meta name="takprodam-verification" content="174c890d-4e59-4f04-afed-e2d4ca6873ac">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://artemida2.github.io/es/">
-<meta property="og:title" content="Rastreador en vivo de la misión lunar Artemis II">
-<meta property="og:description" content="¿Dónde está la nave Orion ahora mismo? Mapa interactivo del vuelo, temporizador y transmisión en directo de la NASA. ¡Únete al evento histórico!">
-<meta property="og:image" content="https://artemida2.github.io/preview.jpg"> <meta property="og:site_name" content="Artemis II Live Tracker">
+<meta property="og:title" content="Artemis: Escala del Universo — del quark al Hubble">
+<meta property="og:description" content="Recorre 62 órdenes de magnitud — de la longitud de Planck al diámetro del Universo observable. ~60 objetos con datos. Bonus: archivo de la misión Artemis II.">
+<meta property="og:image" content="https://artemida2.github.io/preview.jpg">
+<meta property="og:site_name" content="Artemis: Escala del Universo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Artemis: Escala del Universo — del quark al Hubble">
+<meta name="twitter:description" content="62 órdenes de magnitud con un solo scroll. Descubre tu escala.">
+<meta name="twitter:image" content="https://artemida2.github.io/preview.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Artemis: Escala del Universo",
+  "url": "https://artemida2.github.io/es/",
+  "description": "Scroll logarítmico interactivo por 62 órdenes de magnitud — de la longitud de Planck al diámetro del Universo observable.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["es", "ru", "en"],
+  "isAccessibleForFree": true
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="/es/favicon.png">
@@ -137,9 +155,212 @@ header {
 .header-met-label { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: var(--sub); letter-spacing: 2px; }
 .header-met-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: var(--amber); letter-spacing: 2px; }
 
+.header-nav {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 1.5px;
+}
+.header-nav a, .header-nav button {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--txt);
+  text-transform: uppercase; cursor: pointer;
+  background: rgba(0,200,255,0.04);
+  transition: border-color .18s, background .18s, color .18s;
+  white-space: nowrap;
+}
+.header-nav a:hover, .header-nav button:hover {
+  border-color: var(--cyan); color: var(--cyan);
+  background: rgba(0,200,255,0.08);
+}
+.header-nav a.cta {
+  background: linear-gradient(90deg, rgba(0,200,255,0.18), rgba(192,96,255,0.18));
+  border-color: rgba(0,200,255,0.55);
+  color: #fff; font-weight: 600;
+}
+.header-nav a.cta:hover {
+  border-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(0,200,255,0.28), rgba(192,96,255,0.28));
+}
+.header-nav .lang-pill { padding: 6px 8px; font-size: 9px; opacity: .8; }
+.header-nav .lang-pill.active { color: var(--cyan); border-color: var(--cyan); opacity: 1; }
+
+@media (max-width: 720px) {
+  .header-nav a.cta .cta-long { display: none; }
+}
 @media (max-width: 480px) {
   .header-sub { display: none; }
-  .header-live { display: none; }
+  .header-nav .archive-link, .header-nav .lang-pill[data-lang="ru"] { display: none; }
+  .header-nav { gap: 6px; }
+  .header-nav a, .header-nav button { padding: 5px 7px; font-size: 9px; }
+}
+
+/* ══════════════════════════════════════════
+   HERO — «ESCALA DEL UNIVERSO»
+══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  padding: 28px 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 60%, rgba(0,200,255,0.08), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 30% 30%, rgba(192,96,255,0.07), transparent 70%);
+  overflow: hidden;
+}
+.hero-grid {
+  max-width: 1320px; margin: 0 auto;
+  display: grid; gap: 22px;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+@media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; gap: 18px; } }
+
+.hero-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 4px;
+  color: var(--cyan); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.hero-eyebrow .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+  animation: blink 2.4s ease-in-out infinite;
+}
+.hero-h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900; line-height: 1.05;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #fff 0%, var(--cyan) 50%, var(--purple) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
+}
+.hero-h1 .accent {
+  background: linear-gradient(90deg, var(--orange), var(--amber));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-lead {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.5; color: var(--txt);
+  max-width: 540px; margin-bottom: 20px;
+}
+.hero-lead b { color: #fff; font-weight: 600; }
+.hero-stats {
+  display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 22px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.hero-stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px; font-weight: 700;
+  color: var(--cyan);
+  display: block; line-height: 1.1;
+}
+.hero-stat-lbl {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--sub); text-transform: uppercase;
+}
+.hero-cta-row {
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 22px;
+  border-radius: 10px; border: 1px solid var(--border2);
+  font-family: 'Orbitron', monospace;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #fff; cursor: pointer;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+  background: rgba(2,8,22,.6);
+  text-decoration: none;
+}
+.hero-cta:hover { transform: translateY(-1px); }
+.hero-cta-primary {
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  border: none; color: #001020;
+  box-shadow: 0 0 0 1px rgba(0,200,255,.4), 0 8px 30px rgba(0,200,255,.25);
+}
+.hero-cta-primary:hover { box-shadow: 0 0 0 1px rgba(0,200,255,.6), 0 10px 40px rgba(0,200,255,.4); }
+.hero-cta-ghost { color: var(--cyan); }
+.hero-cta-ghost:hover { border-color: var(--cyan); color: #fff; box-shadow: 0 0 24px rgba(0,200,255,.18); }
+.hero-cta .arr { font-size: 16px; }
+
+.hero-frame {
+  display: block; width: 100%;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  background: #010206;
+  aspect-ratio: 16 / 10;
+  box-shadow: 0 0 0 1px rgba(0,200,255,.18), 0 18px 60px rgba(0,200,255,.12), 0 0 80px rgba(192,96,255,.1);
+  text-decoration: none;
+}
+.hero-frame:hover { box-shadow: 0 0 0 1px rgba(0,200,255,.4), 0 24px 70px rgba(0,200,255,.22), 0 0 100px rgba(192,96,255,.18); }
+.hero-frame iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0; display: block;
+}
+.hero-frame .frame-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(2,8,22,0.55) 0%, rgba(2,8,22,0) 30%);
+}
+.hero-frame .frame-cap {
+  position: absolute; left: 14px; bottom: 12px; right: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--cyan); text-transform: uppercase;
+  pointer-events: none;
+}
+.hero-frame .frame-cap .more {
+  color: rgba(189,216,240,.7);
+  font-size: 9px; letter-spacing: 1px;
+}
+@media (max-width: 980px) {
+  .hero-frame { aspect-ratio: 16 / 11; }
+  .hero { padding: 22px 14px 20px; }
+}
+
+/* ══════════════════════════════════════════
+   ARCHIVE HEADING
+══════════════════════════════════════════ */
+.archive-heading {
+  max-width: 1320px; margin: 28px auto 4px; padding: 0 16px;
+}
+.archive-heading .eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 4px;
+  color: var(--amber); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.archive-heading .eyebrow::before {
+  content: '◆';
+  color: var(--amber);
+  text-shadow: 0 0 8px rgba(255,184,48,.6);
+}
+.archive-heading h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800; letter-spacing: 0.04em;
+  color: #fff; margin: 6px 0 4px;
+}
+.archive-heading p {
+  font-size: 14px; color: var(--sub);
+  max-width: 720px;
+}
+.archive-divider {
+  max-width: 1320px; margin: 18px auto 0; padding: 0 16px;
+}
+.archive-divider hr {
+  border: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
 }
 
 /* ══════════════════════════════════════════
@@ -598,26 +819,85 @@ footer {
 <!-- ══ HEADER ══ -->
 <header>
   <div class="header-inner">
-    <div class="header-brand">
-      <span class="header-icon">🚀</span>
+    <a href="/es/" class="header-brand" style="text-decoration:none">
+      <span class="header-icon">🌌</span>
       <div class="header-divider"></div>
       <div class="min-w-0">
-        <div class="header-title shine">ARTEMIS II</div>
-        <div class="header-sub">EL PRIMER VUELO TRIPULADO A LA LUNA EN 53 AÑOS</div>
+        <div class="header-title shine">ARTEMIS</div>
+        <div class="header-sub">ESCALA DEL UNIVERSO · DEL QUARK AL HUBBLE</div>
       </div>
-    </div>
-    <div class="header-right">
-      <div class="header-live">
-        <div class="ldot"></div>
-        <span>EN VUELO</span>
-      </div>
-      <div class="header-met">
-        <div class="header-met-label">TIEMPO DE VUELO</div>
-        <div class="header-met-val orb" id="h-met">T+00:00:00</div>
-      </div>
-    </div>
+    </a>
+    <nav class="header-nav" aria-label="Navegación">
+      <a class="cta" href="/scale/en/" hreflang="en" title="Open the interactive Scale of the Universe">
+        <span>🌌 SCALE</span>
+        <span class="cta-long">— OPEN</span>
+      </a>
+      <a class="archive-link" href="#archive" title="Archivo de la misión Artemis II">ARCHIVO MISIÓN</a>
+      <a class="lang-pill" data-lang="ru" href="/" hreflang="ru" title="Русский">RU</a>
+      <a class="lang-pill" data-lang="en" href="/scale/en/" hreflang="en" title="English (Scale)">EN</a>
+      <a class="lang-pill active" data-lang="es" href="/es/" aria-current="page" title="Español">ES</a>
+    </nav>
   </div>
 </header>
+
+<!-- ══ HERO — «ESCALA DEL UNIVERSO» ══ -->
+<section class="hero" id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span> Interactivo principal</div>
+      <h1 class="hero-h1">Recorre todo el <span class="accent">Universo</span></h1>
+      <p class="hero-lead">
+        62 órdenes de magnitud — de la <b>longitud de Planck</b> (10⁻³⁵ m) al diámetro del <b>Universo observable</b> (≈10²⁷ m). Cerca de 60 objetos con datos, comparaciones y compartir. Solo gira la rueda.
+      </p>
+      <div class="hero-stats">
+        <div>
+          <span class="hero-stat-num">10<sup>62</sup></span>
+          <span class="hero-stat-lbl">Órdenes de magnitud</span>
+        </div>
+        <div>
+          <span class="hero-stat-num">~60</span>
+          <span class="hero-stat-lbl">Objetos</span>
+        </div>
+        <div>
+          <span class="hero-stat-num">8</span>
+          <span class="hero-stat-lbl">Épocas de color</span>
+        </div>
+      </div>
+      <div class="hero-cta-row">
+        <a class="hero-cta hero-cta-primary" href="/scale/en/" hreflang="en" data-cta="en">
+          <span>🌌 OPEN SCALE (EN)</span>
+          <span class="arr">→</span>
+        </a>
+        <a class="hero-cta hero-cta-ghost" href="/scale/" hreflang="ru" data-cta="ru">
+          <span>🇷🇺 ВЕРСИЯ НА РУССКОМ</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <a class="hero-frame" href="/scale/en/?focus=milkyway" aria-label="Open the interactive Scale of the Universe — Milky Way">
+        <iframe
+          src="/scale/en/?focus=milkyway&amp;embed=1"
+          loading="lazy"
+          title="Preview: Scale of the Universe — Milky Way"
+          tabindex="-1"
+          aria-hidden="true"></iframe>
+        <div class="frame-overlay"></div>
+        <div class="frame-cap">
+          <span>● Vía Láctea · ≈10²¹ m</span>
+          <span class="more">Clic — abrir a pantalla completa →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ARCHIVE HEADING ══ -->
+<div class="archive-heading" id="archive">
+  <div class="eyebrow">ARCHIVO · MISIÓN COMPLETADA</div>
+  <h2>Artemis II — el primer vuelo tripulado a la Luna en 53 años</h2>
+  <p>La misión finalizó el 11 de abril de 2026. A continuación, la telemetría y el mapa interactivo de la trayectoria, calculados con un modelo físico. Es un archivo histórico que conservamos para quienes deseen revivir el vuelo.</p>
+</div>
+<div class="archive-divider"><hr></div>
 
 <!-- ══ AD: 728×90 LEADERBOARD ══ -->
 <div style="display:flex;justify-content:center;align-items:center;padding:8px 16px;background:rgba(1,4,12,.97);border-bottom:1px solid rgba(0,180,255,0.10);overflow:hidden;">
@@ -1019,8 +1299,8 @@ footer {
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-copy">NASA JSC · DEEP SPACE NETWORK · ORION «INTEGRITY» · T-0: 1 ABR 2026, 22:35 UTC</div>
-      <div class="footer-legal">Datos calculados mediante modelo físico. No es telemetría oficial de la NASA.</div>
+      <div class="footer-copy">ARTEMIS · ESCALA DEL UNIVERSO &nbsp;·&nbsp; <a href="/scale/" style="color:var(--cyan)">/scale/</a> &nbsp;·&nbsp; <a href="/scale/en/" style="color:var(--cyan)">/scale/en/</a> &nbsp;·&nbsp; <a href="/" style="color:var(--cyan)">/</a></div>
+      <div class="footer-legal">Archivo de la misión: NASA JSC · DSN · Orion «Integrity» · T-0: 1 abr 2026. Datos calculados con modelo físico — no es telemetría oficial de la NASA.</div>
     </div>
     <div class="footer-right">
       <div class="footer-upd">Actualizado: <span id="last-upd">--</span></div>
