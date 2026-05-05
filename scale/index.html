@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#020408">
+
+<title>Масштаб Вселенной — от кварка до Хаббла. Интерактивный скролл | Артемида</title>
+<meta name="description" content="Прокрути всю Вселенную одной прокруткой: 62 порядка величины — от планковской длины до диаметра наблюдаемой Вселенной. ~60 объектов, факты, сравнения, шеринг.">
+<meta name="keywords" content="масштаб вселенной, размер вселенной, от кварка до вселенной, scale of the universe, порядок величины, наблюдаемая вселенная, размеры объектов, образовательный сайт, скролл вселенная, артемида">
+
+<link rel="canonical" href="https://artemida2.github.io/scale/">
+<link rel="alternate" hreflang="ru" href="https://artemida2.github.io/scale/">
+<link rel="alternate" hreflang="en" href="https://artemida2.github.io/scale/en/">
+<link rel="alternate" hreflang="x-default" href="https://artemida2.github.io/scale/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://artemida2.github.io/scale/">
+<meta property="og:title" content="Масштаб Вселенной — от кварка до Хаббла">
+<meta property="og:description" content="Интерактивный скролл по 62 порядкам величины — от квантовой пены до наблюдаемой Вселенной. ~60 объектов, факты, шеринг.">
+<meta property="og:image" content="https://artemida2.github.io/preview.jpg">
+<meta property="og:site_name" content="Артемида: Масштаб Вселенной">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="en_US">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Масштаб Вселенной — от кварка до Хаббла">
+<meta name="twitter:description" content="Прокрути всю Вселенную: 62 порядка величины. От квантовой пены до диаметра наблюдаемой Вселенной.">
+<meta name="twitter:image" content="https://artemida2.github.io/preview.jpg">
+
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/scale/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Артемида: Масштаб Вселенной",
+  "alternateName": "Scale of the Universe",
+  "url": "https://artemida2.github.io/scale/",
+  "description": "Интерактивный скролл по 62 порядкам величины — от планковской длины до диаметра наблюдаемой Вселенной.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["ru", "en"],
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript and Canvas 2D",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Артемида",
+    "url": "https://artemida2.github.io/"
+  }
+}
+</script>
+
+<script>window.SU_LANG = 'ru';</script>
+</head>
+<body>
+
+<div id="su-bg"></div>
+<canvas id="su-canvas" aria-label="Интерактивная сцена масштаба Вселенной"></canvas>
+
+<header class="su-header" role="banner">
+  <a class="su-brand" href="/" title="Артемида">
+    <span class="su-logo" aria-hidden="true"></span>
+    <span>Артемида</span>
+    <span class="su-sub">· Масштаб Вселенной</span>
+  </a>
+  <nav class="su-actions" aria-label="Действия">
+    <button id="su-btn-search" class="su-btn" type="button" title="Поиск (/)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      <span class="su-btn-text">Поиск</span>
+    </button>
+    <button id="su-btn-sound" class="su-btn" type="button" aria-pressed="false" title="Звук">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M19 12c0-3-2-5-2-5"/></svg>
+      <span class="su-btn-text">Звук</span>
+    </button>
+    <button id="su-btn-share" class="su-btn" type="button" title="Поделиться">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      <span class="su-btn-text">Поделиться</span>
+    </button>
+    <a class="su-btn" href="/scale/en/" title="Switch language" hreflang="en">
+      <span>EN</span>
+    </a>
+  </nav>
+</header>
+
+<aside class="su-zoom" aria-label="Зум">
+  <button id="su-zoom-in"  type="button" title="−10× (вглубь)">−10×</button>
+  <button id="su-zoom-out" type="button" title="+10× (наружу)">+10×</button>
+</aside>
+
+<div id="su-progress" class="su-progress" role="slider" aria-label="Прогресс по масштабу Вселенной" tabindex="0">
+  <div id="su-progress-fill" class="su-progress-fill"></div>
+  <div id="su-progress-handle" class="su-progress-handle"></div>
+</div>
+
+<section id="su-card" class="su-card" aria-live="polite">
+  <div class="su-card-head">
+    <div id="su-card-title" class="su-card-title">—</div>
+    <div id="su-card-size" class="su-card-size mono">—</div>
+  </div>
+  <div id="su-card-fact" class="su-card-fact">—</div>
+  <div id="su-card-compare" class="su-card-compare mono">—</div>
+  <div class="su-card-actions">
+    <button class="su-btn" type="button" data-action="copy-link" title="Скопировать ссылку">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+      Ссылка
+    </button>
+    <button class="su-btn" type="button" data-action="copy-meme" title="Скопировать как мем">
+      Мем
+    </button>
+    <button class="su-btn" type="button" data-action="share-tg" title="Telegram">TG</button>
+    <button class="su-btn" type="button" data-action="share-vk" title="ВКонтакте">VK</button>
+    <button class="su-btn" type="button" data-action="share-tw" title="Twitter">X</button>
+  </div>
+</section>
+
+<div id="su-hint" class="su-hint" aria-hidden="true">
+  Прокрути всю Вселенную
+  <div class="su-hint-sub">Колесо мыши, тачпад, свайп или ↑↓ — от кварка до Хаббла</div>
+</div>
+
+<div id="su-search" class="su-search" aria-hidden="true">
+  <div class="su-search-box" role="dialog" aria-label="Поиск объекта">
+    <input id="su-search-input" type="text" placeholder="Найти объект (атом, человек, Земля...)" autocomplete="off">
+    <div id="su-search-list" class="su-search-list"></div>
+  </div>
+</div>
+
+<footer class="su-footer">
+  <div>
+    <a href="/">Артемида: Лунная миссия</a>
+    <span class="su-divider"> · </span>
+    <a href="/scale/en/" hreflang="en">English</a>
+  </div>
+</footer>
+
+<noscript>
+  <div class="su-static-list">
+    <h1 style="font-family:'Orbitron',monospace;color:#00c8ff;text-transform:uppercase;letter-spacing:.06em">Масштаб Вселенной</h1>
+    <p style="margin:14px 0 24px;color:#bdd8f0;line-height:1.5">
+      Этот сайт — интерактивный скролл-зум по 62 порядкам величины: от планковской длины (10⁻³⁵ м)
+      до диаметра наблюдаемой Вселенной (≈10²⁷ м). Включите JavaScript, чтобы запустить интерактив.
+      Ниже — список ключевых объектов.
+    </p>
+    <ul style="line-height:1.8;color:#bdd8f0;list-style:none;padding:0">
+      <li><b>Планковская длина</b> — 1,6×10⁻³⁵ м. Самая малая длина, на которой имеют смысл понятия пространства и времени.</li>
+      <li><b>Кварк</b> — &lt;10⁻¹⁹ м. Точечная фундаментальная частица.</li>
+      <li><b>Электрон</b> — &lt;10⁻¹⁸ м. Считается точечной частицей.</li>
+      <li><b>Протон</b> — 1,7×10⁻¹⁵ м. Состоит из трёх кварков.</li>
+      <li><b>Атом водорода</b> — 1,06×10⁻¹⁰ м. Самый простой и распространённый атом.</li>
+      <li><b>ДНК</b> — 2 нм в диаметре. Развёрнутая ДНК человека достаёт до Солнца и обратно 67 раз.</li>
+      <li><b>Транзистор 3 нм</b> — современный чип.</li>
+      <li><b>Вирус COVID-19</b> — 120 нм. Шипастая сфера.</li>
+      <li><b>Бактерия E. coli</b> — 2 мкм. В тебе ~10¹³ бактерий.</li>
+      <li><b>Эритроцит</b> — 8 мкм. ~25 триллионов в твоей крови.</li>
+      <li><b>Клетка человека</b> — 20 мкм. ~37 триллионов клеток в теле.</li>
+      <li><b>Толщина волоса</b> — 70 мкм.</li>
+      <li><b>Песчинка</b> — 0,5 мм.</li>
+      <li><b>Муравей</b> — 5 мм.</li>
+      <li><b>Человек</b> — 1,7 м. Ты где-то посередине между кварком и наблюдаемой Вселенной.</li>
+      <li><b>Синий кит</b> — 30 м. Самое крупное животное за всю историю Земли.</li>
+      <li><b>Эйфелева башня</b> — 330 м.</li>
+      <li><b>Бурдж-Халифа</b> — 828 м.</li>
+      <li><b>Эверест</b> — 8 848 м.</li>
+      <li><b>Луна</b> — 3 474 км.</li>
+      <li><b>Земля</b> — 12 742 км.</li>
+      <li><b>Юпитер</b> — 139 820 км.</li>
+      <li><b>Солнце</b> — 1 392 000 км.</li>
+      <li><b>Астрономическая единица</b> — 149,6 млн км.</li>
+      <li><b>UY Щита</b> — 2,4×10¹² м. Одна из крупнейших известных звёзд.</li>
+      <li><b>Облако Оорта</b> — ~1 световой год от Солнца.</li>
+      <li><b>Световой год</b> — 9,46×10¹⁵ м.</li>
+      <li><b>Проксима Центавра</b> — 4,24 светового года.</li>
+      <li><b>Туманность Ориона</b> — 24 световых года в поперечнике.</li>
+      <li><b>Млечный Путь</b> — ~100 000 световых лет.</li>
+      <li><b>Андромеда</b> — 2,5 млн световых лет от нас.</li>
+      <li><b>Местная группа галактик</b> — ~10 млн световых лет.</li>
+      <li><b>Сверхскопление Ланиакея</b> — 520 млн световых лет.</li>
+      <li><b>Великая стена Слоуна</b> — 1,4 млрд световых лет.</li>
+      <li><b>Наблюдаемая Вселенная</b> — 93 млрд световых лет в поперечнике.</li>
+    </ul>
+  </div>
+</noscript>
+
+<!-- SAPE RTB JS -->
+<script async src="https://cdn-rtb.sape.ru/rtb-b/js/120/2/174120.js" type="text/javascript"></script>
+<!-- SAPE RTB END -->
+
+<script src="/scale/app.js" defer></script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js?id=108414617", "ym");
+   ym(108414617, "init", {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/108414617" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+</body>
+</html>

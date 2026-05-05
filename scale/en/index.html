@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#020408">
+
+<title>Scale of the Universe — From Quark to Hubble. Interactive Scroll | Artemida</title>
+<meta name="description" content="Scroll the whole Universe in one scroll: 62 orders of magnitude — from Planck length to the diameter of the observable Universe. ~60 objects, facts, comparisons, sharing.">
+<meta name="keywords" content="scale of the universe, size of the universe, from quark to universe, orders of magnitude, observable universe, sizes of objects, educational, scroll universe, artemida">
+
+<link rel="canonical" href="https://artemida2.github.io/scale/en/">
+<link rel="alternate" hreflang="ru" href="https://artemida2.github.io/scale/">
+<link rel="alternate" hreflang="en" href="https://artemida2.github.io/scale/en/">
+<link rel="alternate" hreflang="x-default" href="https://artemida2.github.io/scale/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://artemida2.github.io/scale/en/">
+<meta property="og:title" content="Scale of the Universe — From Quark to Hubble">
+<meta property="og:description" content="Interactive scroll across 62 orders of magnitude — from quantum foam to the observable Universe. ~60 objects, facts, sharing.">
+<meta property="og:image" content="https://artemida2.github.io/preview.jpg">
+<meta property="og:site_name" content="Artemida: Scale of the Universe">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scale of the Universe — From Quark to Hubble">
+<meta name="twitter:description" content="Scroll the whole Universe: 62 orders of magnitude. From quantum foam to the diameter of the observable Universe.">
+<meta name="twitter:image" content="https://artemida2.github.io/preview.jpg">
+
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/scale/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Artemida: Scale of the Universe",
+  "alternateName": "Масштаб Вселенной",
+  "url": "https://artemida2.github.io/scale/en/",
+  "description": "Interactive scroll across 62 orders of magnitude — from Planck length to the diameter of the observable Universe.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["en", "ru"],
+  "isAccessibleForFree": true,
+  "browserRequirements": "Requires JavaScript and Canvas 2D",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Artemida",
+    "url": "https://artemida2.github.io/"
+  }
+}
+</script>
+
+<script>window.SU_LANG = 'en';</script>
+</head>
+<body>
+
+<div id="su-bg"></div>
+<canvas id="su-canvas" aria-label="Interactive scene of the scale of the Universe"></canvas>
+
+<header class="su-header" role="banner">
+  <a class="su-brand" href="/" title="Artemida">
+    <span class="su-logo" aria-hidden="true"></span>
+    <span>Artemida</span>
+    <span class="su-sub">· Scale of the Universe</span>
+  </a>
+  <nav class="su-actions" aria-label="Actions">
+    <button id="su-btn-search" class="su-btn" type="button" title="Search (/)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      <span class="su-btn-text">Search</span>
+    </button>
+    <button id="su-btn-sound" class="su-btn" type="button" aria-pressed="false" title="Sound">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M19 12c0-3-2-5-2-5"/></svg>
+      <span class="su-btn-text">Sound</span>
+    </button>
+    <button id="su-btn-share" class="su-btn" type="button" title="Share">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      <span class="su-btn-text">Share</span>
+    </button>
+    <a class="su-btn" href="/scale/" title="Сменить язык" hreflang="ru">
+      <span>RU</span>
+    </a>
+  </nav>
+</header>
+
+<aside class="su-zoom" aria-label="Zoom">
+  <button id="su-zoom-in"  type="button" title="−10× (zoom in)">−10×</button>
+  <button id="su-zoom-out" type="button" title="+10× (zoom out)">+10×</button>
+</aside>
+
+<div id="su-progress" class="su-progress" role="slider" aria-label="Progress along the scale" tabindex="0">
+  <div id="su-progress-fill" class="su-progress-fill"></div>
+  <div id="su-progress-handle" class="su-progress-handle"></div>
+</div>
+
+<section id="su-card" class="su-card" aria-live="polite">
+  <div class="su-card-head">
+    <div id="su-card-title" class="su-card-title">—</div>
+    <div id="su-card-size" class="su-card-size mono">—</div>
+  </div>
+  <div id="su-card-fact" class="su-card-fact">—</div>
+  <div id="su-card-compare" class="su-card-compare mono">—</div>
+  <div class="su-card-actions">
+    <button class="su-btn" type="button" data-action="copy-link" title="Copy link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+      Link
+    </button>
+    <button class="su-btn" type="button" data-action="copy-meme" title="Copy as meme">Meme</button>
+    <button class="su-btn" type="button" data-action="share-tg" title="Telegram">TG</button>
+    <button class="su-btn" type="button" data-action="share-vk" title="VK">VK</button>
+    <button class="su-btn" type="button" data-action="share-tw" title="X / Twitter">X</button>
+  </div>
+</section>
+
+<div id="su-hint" class="su-hint" aria-hidden="true">
+  Scroll the Whole Universe
+  <div class="su-hint-sub">Mouse wheel, trackpad, swipe or ↑↓ — from quark to Hubble</div>
+</div>
+
+<div id="su-search" class="su-search" aria-hidden="true">
+  <div class="su-search-box" role="dialog" aria-label="Search object">
+    <input id="su-search-input" type="text" placeholder="Find an object (atom, human, Earth...)" autocomplete="off">
+    <div id="su-search-list" class="su-search-list"></div>
+  </div>
+</div>
+
+<footer class="su-footer">
+  <div>
+    <a href="/">Artemida: Lunar mission</a>
+    <span class="su-divider"> · </span>
+    <a href="/scale/" hreflang="ru">Русский</a>
+  </div>
+</footer>
+
+<noscript>
+  <div class="su-static-list">
+    <h1 style="font-family:'Orbitron',monospace;color:#00c8ff;text-transform:uppercase;letter-spacing:.06em">Scale of the Universe</h1>
+    <p style="margin:14px 0 24px;color:#bdd8f0;line-height:1.5">
+      This site is an interactive scroll-zoom across 62 orders of magnitude: from the Planck length (10⁻³⁵ m)
+      to the diameter of the observable Universe (≈10²⁷ m). Enable JavaScript to start the interactive experience.
+      Below is a list of key objects.
+    </p>
+    <ul style="line-height:1.8;color:#bdd8f0;list-style:none;padding:0">
+      <li><b>Planck length</b> — 1.6×10⁻³⁵ m. The smallest meaningful length scale.</li>
+      <li><b>Quark</b> — &lt;10⁻¹⁹ m. A point-like fundamental particle.</li>
+      <li><b>Electron</b> — &lt;10⁻¹⁸ m. Considered point-like.</li>
+      <li><b>Proton</b> — 1.7×10⁻¹⁵ m. Made of three quarks.</li>
+      <li><b>Hydrogen atom</b> — 1.06×10⁻¹⁰ m. The simplest, most abundant atom.</li>
+      <li><b>DNA</b> — 2 nm wide. Unwound, one human's DNA reaches the Sun and back 67 times.</li>
+      <li><b>3 nm transistor</b> — modern silicon chip.</li>
+      <li><b>SARS-CoV-2</b> — 120 nm spiked sphere.</li>
+      <li><b>E. coli bacterium</b> — 2 μm. ~10¹³ bacteria live in your body.</li>
+      <li><b>Red blood cell</b> — 8 μm. ~25 trillion in your blood.</li>
+      <li><b>Human cell</b> — 20 μm. ~37 trillion cells in the body.</li>
+      <li><b>Human hair</b> — 70 μm thick.</li>
+      <li><b>Grain of sand</b> — 0.5 mm.</li>
+      <li><b>Ant</b> — 5 mm.</li>
+      <li><b>Human</b> — 1.7 m. You are nearly in the middle between a quark and the observable Universe.</li>
+      <li><b>Blue whale</b> — 30 m. The largest animal ever to exist on Earth.</li>
+      <li><b>Eiffel Tower</b> — 330 m.</li>
+      <li><b>Burj Khalifa</b> — 828 m.</li>
+      <li><b>Mount Everest</b> — 8 848 m.</li>
+      <li><b>Moon</b> — 3 474 km.</li>
+      <li><b>Earth</b> — 12 742 km.</li>
+      <li><b>Jupiter</b> — 139 820 km.</li>
+      <li><b>Sun</b> — 1 392 000 km.</li>
+      <li><b>Astronomical Unit</b> — 149.6 million km.</li>
+      <li><b>UY Scuti</b> — 2.4×10¹² m. One of the largest known stars.</li>
+      <li><b>Oort Cloud</b> — ~1 light-year from the Sun.</li>
+      <li><b>Light-year</b> — 9.46×10¹⁵ m.</li>
+      <li><b>Proxima Centauri</b> — 4.24 light-years away.</li>
+      <li><b>Orion Nebula</b> — 24 light-years across.</li>
+      <li><b>Milky Way</b> — ~100 000 light-years.</li>
+      <li><b>Andromeda</b> — 2.5 million light-years from us.</li>
+      <li><b>Local Group</b> — ~10 million light-years.</li>
+      <li><b>Laniakea Supercluster</b> — 520 million light-years.</li>
+      <li><b>Sloan Great Wall</b> — 1.4 billion light-years.</li>
+      <li><b>Observable Universe</b> — 93 billion light-years across.</li>
+    </ul>
+  </div>
+</noscript>
+
+<!-- Yandex.RTB (consistent with /es/ subdomain monetization style) -->
+<script>window.yaContextCb=window.yaContextCb||[]</script>
+<script src="https://yandex.ru/ads/system/context.js" async></script>
+
+<script src="/scale/app.js" defer></script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js?id=108414617", "ym");
+   ym(108414617, "init", {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/108414617" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+</body>
+</html>
