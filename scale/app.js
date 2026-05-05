@@ -1245,7 +1245,12 @@
     }
     state.audioOn = !state.audioOn;
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    audioGain.gain.linearRampToValueAtTime(state.audioOn ? 0.06 : 0, audioCtx.currentTime + 0.5);
+    /* Сбрасываем предыдущую автоматизацию, чтобы быстрый toggle
+       не вызывал «выстрел» громкости перед спадом к нулю. */
+    const now = audioCtx.currentTime;
+    audioGain.gain.cancelScheduledValues(now);
+    audioGain.gain.setValueAtTime(audioGain.gain.value, now);
+    audioGain.gain.linearRampToValueAtTime(state.audioOn ? 0.06 : 0, now + 0.5);
     soundBtn.setAttribute('aria-pressed', state.audioOn ? 'true' : 'false');
   }
   function modulateAudio() {

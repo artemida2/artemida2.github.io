@@ -482,12 +482,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   }
 }
 
-/* ═══════════════ Static (no-JS) fallback list ═══════════════ */
+/* ═══════════════ Static (no-JS) fallback list ═══════════════
+   Контент находится внутри <noscript>, поэтому браузер сам показывает
+   его только при отключённом JavaScript. Внешний CSS-флаг не нужен. */
 .su-static-list {
-  display: none;
+  position: relative;
+  z-index: 50;
   padding: 80px 20px 40px;
   max-width: 800px;
   margin: 0 auto;
 }
-.su-no-js .su-static-list { display: block; }
-.su-no-js #su-canvas, .su-no-js .su-card, .su-no-js .su-progress, .su-no-js .su-zoom { display: none; }
