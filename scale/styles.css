@@ -1,0 +1,493 @@
+/* ════════════════════════════════════════════════════════════════
+   АРТЕМИДА: МАСШТАБ ВСЕЛЕННОЙ — styles.css
+   Единая палитра/типографика с основным сайтом artemida2.github.io
+   ════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cyan:    #00c8ff;
+  --cyan2:   #0090cc;
+  --orange:  #ff6b35;
+  --green:   #39ff6a;
+  --purple:  #c060ff;
+  --amber:   #ffb830;
+  --magenta: #ff5fc4;
+  --txt:     #bdd8f0;
+  --sub:     rgba(189,216,240,0.55);
+  --glass:   rgba(4,12,30,0.78);
+  --border:  rgba(0,180,255,0.18);
+  --border2: rgba(0,180,255,0.36);
+
+  /* Динамические цвета эпохи (меняются JS-ом) */
+  --epoch-color-a: #20102a;
+  --epoch-color-b: #050010;
+  --epoch-accent: #c060ff;
+}
+
+html { scroll-behavior: auto; }
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+body {
+  background: #020408;
+  color: var(--txt);
+  font-family: 'Barlow Condensed', 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  user-select: none;
+  -webkit-user-select: none;
+}
+img { max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+.orb  { font-family: 'Orbitron', 'Inter', monospace; letter-spacing: 0.04em; }
+.mono { font-family: 'Share Tech Mono', 'JetBrains Mono', monospace; }
+
+/* ═══════════════ Анимации ═══════════════ */
+@keyframes su-twinkle { 0%,100%{opacity:var(--o,.7)} 50%{opacity:.05} }
+@keyframes su-blink   { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes su-fadeUp  { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+@keyframes su-pulse   { 0%,100%{box-shadow:0 0 14px var(--epoch-accent), 0 0 0 1px var(--border2)} 50%{box-shadow:0 0 28px var(--epoch-accent), 0 0 0 1px var(--border2)} }
+@keyframes su-shine   { 0%{background-position:0%} 100%{background-position:200%} }
+
+/* ═══════════════ Космический фон ═══════════════ */
+#su-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, var(--epoch-color-a) 0%, var(--epoch-color-b) 75%, #000 100%);
+  transition: background 1.2s ease;
+}
+.su-star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  animation: su-twinkle var(--d,3s) ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ═══════════════ Canvas ═══════════════ */
+#su-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: ns-resize;
+}
+
+/* ═══════════════ Header ═══════════════ */
+.su-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: linear-gradient(180deg, rgba(2,4,8,0.85) 0%, rgba(2,4,8,0.0) 100%);
+  pointer-events: none;
+}
+.su-header > * { pointer-events: auto; }
+.su-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+}
+.su-brand .su-logo {
+  width: 26px; height: 26px;
+  border: 1.5px solid var(--cyan);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  position: relative;
+}
+.su-brand .su-logo::before {
+  content:''; width: 6px; height: 6px; background: var(--cyan); border-radius: 50%;
+  box-shadow: 0 0 12px var(--cyan);
+}
+.su-brand .su-sub {
+  color: var(--txt);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.su-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.su-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--txt);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all .18s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.su-btn:hover { border-color: var(--border2); color: var(--cyan); transform: translateY(-1px); }
+.su-btn[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); }
+.su-btn svg { width: 14px; height: 14px; }
+.su-btn-icon { padding: 7px; }
+
+/* ═══════════════ Карточка объекта ═══════════════ */
+.su-card {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 25;
+  width: min(560px, calc(100vw - 32px));
+  background: var(--glass);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 18px 22px 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(0,180,255,0.06),
+    0 14px 60px rgba(0,0,0,0.55),
+    0 0 24px var(--epoch-accent);
+  animation: su-fadeUp .35s ease both;
+}
+.su-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.su-card-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 0 14px var(--epoch-accent);
+}
+.su-card-size {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--cyan);
+  white-space: nowrap;
+}
+.su-card-size sup { font-size: 0.7em; }
+.su-card-fact {
+  font-size: 15px;
+  color: var(--txt);
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+.su-card-compare {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--sub);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.su-card-compare b { color: var(--amber); font-weight: 500; }
+
+.su-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* ═══════════════ Прогресс-бар (десктоп: справа, мобайл: снизу) ═══════════════ */
+.su-progress {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 8px;
+  height: min(60vh, 520px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.su-progress-fill {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 0%;
+  background: linear-gradient(180deg, var(--cyan), var(--purple), var(--orange));
+  border-radius: 6px;
+  pointer-events: none;
+  transition: height .18s linear;
+}
+.su-progress-marker {
+  position: absolute;
+  left: -4px;
+  width: 16px;
+  height: 2px;
+  background: var(--border2);
+  pointer-events: none;
+}
+.su-progress-label {
+  position: absolute;
+  right: 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--sub);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.su-progress-handle {
+  position: absolute;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  background: var(--cyan);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px var(--cyan), 0 0 0 4px rgba(0,200,255,0.18);
+  animation: su-pulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ═══════════════ Side controls (зум-кнопки) ═══════════════ */
+.su-zoom {
+  position: fixed;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.su-zoom button {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--txt);
+  letter-spacing: 0.03em;
+  transition: all .15s ease;
+  display: grid; place-items: center;
+}
+.su-zoom button:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ═══════════════ Hint ═══════════════ */
+.su-hint {
+  position: fixed;
+  left: 50%; top: 18%;
+  transform: translateX(-50%);
+  z-index: 24;
+  background: rgba(2,4,8,0.55);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 12px 22px;
+  text-align: center;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  animation: su-fadeUp .4s ease both;
+  text-transform: uppercase;
+  transition: opacity .4s ease;
+}
+.su-hint.hidden { display: none; }
+.su-hint .su-hint-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--sub);
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  text-transform: none;
+}
+
+/* ═══════════════ Toast (после copy) ═══════════════ */
+.su-toast {
+  position: fixed;
+  left: 50%; top: 24%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 50;
+  background: var(--glass);
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--green);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: su-fadeUp .25s ease both;
+  pointer-events: none;
+  box-shadow: 0 0 24px rgba(57,255,106,0.25);
+}
+
+/* ═══════════════ Search overlay ═══════════════ */
+.su-search {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(2,4,8,0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+}
+.su-search.open { display: flex; }
+.su-search-box {
+  width: min(520px, 92vw);
+  background: #050a18;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.su-search-box input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--txt);
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  padding: 16px 20px;
+  outline: none;
+  border-bottom: 1px solid var(--border);
+}
+.su-search-list {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.su-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 20px;
+  font-size: 15px;
+  color: var(--txt);
+  border-bottom: 1px solid rgba(0,180,255,0.06);
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.su-search-item:hover, .su-search-item.active {
+  background: rgba(0,180,255,0.08);
+  color: var(--cyan);
+}
+.su-search-item .su-search-size {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--sub);
+}
+
+/* ═══════════════ Footer/About link ═══════════════ */
+.su-footer {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sub);
+}
+.su-footer a:hover { color: var(--cyan); }
+.su-footer .su-divider { color: var(--border2); }
+
+/* ═══════════════ Адаптив ═══════════════ */
+@media (max-width: 720px) {
+  body { font-size: 15px; }
+  .su-header { padding: 10px 12px; }
+  .su-brand { font-size: 12px; }
+  .su-brand .su-sub { display: none; }
+  .su-actions .su-btn-text { display: none; }
+  .su-actions .su-btn { padding: 7px; }
+  .su-actions .su-btn svg { margin: 0; }
+  .su-card {
+    bottom: 70px;
+    width: calc(100vw - 16px);
+    padding: 14px 16px 12px;
+  }
+  .su-card-title { font-size: 18px; }
+  .su-card-fact { font-size: 14px; }
+  .su-zoom { display: none; }
+  .su-progress {
+    right: auto; left: 50%;
+    top: auto; bottom: 14px;
+    transform: translateX(-50%);
+    width: min(70vw, 360px);
+    height: 6px;
+    flex-direction: row;
+  }
+  .su-progress-fill {
+    top: 0; bottom: 0; left: 0;
+    right: auto;
+    height: auto;
+    width: 0%;
+    transition: width .18s linear;
+  }
+  .su-progress-marker {
+    left: auto; top: -4px;
+    width: 2px; height: 14px;
+  }
+  .su-progress-label {
+    display: none;
+  }
+  .su-progress-handle {
+    top: 50%; left: 0;
+  }
+  .su-footer { font-size: 10px; bottom: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════ Static (no-JS) fallback list ═══════════════ */
+.su-static-list {
+  display: none;
+  padding: 80px 20px 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.su-no-js .su-static-list { display: block; }
+.su-no-js #su-canvas, .su-no-js .su-card, .su-no-js .su-progress, .su-no-js .su-zoom { display: none; }
