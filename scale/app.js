@@ -634,10 +634,19 @@
       /* Cull off-screen — но с запасом, чтобы крупные объекты могли «выглядывать». */
       if (x + size * 0.6 < -40 || x - size * 0.6 > W + 40) continue;
       const fadeWindow = 1 - Math.min(1, Math.abs(dlog) / VISIBLE_HALF_WINDOW);
-      let alpha = Math.pow(fadeWindow, 1.4);
-      const isFocus = Math.abs(dlog) < 0.25;
-      if (isFocus) alpha = 1;
-      items.push({ o, dlog, x, size, alpha, isFocus });
+      const alpha = Math.pow(fadeWindow, 1.4);
+      items.push({ o, dlog, x, size, alpha, isFocus: false });
+    }
+    /* Только ОДИН ближайший к камере объект помечается фокусом — иначе при
+       плотных скоплениях (gold/water, flu/sars-cov-2 и т.п.) несколько
+       одинаково «близких» объектов попадали в скрытый список и вырезались. */
+    let nearest = null;
+    for (const it of items) {
+      if (!nearest || Math.abs(it.dlog) < Math.abs(nearest.dlog)) nearest = it;
+    }
+    if (nearest && Math.abs(nearest.dlog) < 0.25) {
+      nearest.isFocus = true;
+      nearest.alpha = 1;
     }
     /* Сортируем слева направо — для соединительных линий. */
     items.sort((a, b) => a.dlog - b.dlog);
@@ -722,13 +731,13 @@
     ctx.save();
     ctx.globalAlpha = 0.92;
     ctx.fillStyle = 'rgba(2,8,22,0.72)';
+    ctx.beginPath();
     if (ctx.roundRect) {
-      ctx.beginPath();
       ctx.roundRect(W - padX - boxW, py - r - 8 * dpr, boxW, r * 2 + 16 * dpr, 8 * dpr);
-      ctx.fill();
     } else {
-      ctx.fillRect(W - padX - boxW, py - r - 8 * dpr, boxW, r * 2 + 16 * dpr);
+      ctx.rect(W - padX - boxW, py - r - 8 * dpr, boxW, r * 2 + 16 * dpr);
     }
+    ctx.fill();
     ctx.strokeStyle = 'rgba(0,200,255,0.32)';
     ctx.lineWidth = 1 * dpr;
     ctx.stroke();
